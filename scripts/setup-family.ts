@@ -1,10 +1,41 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import * as readline from 'readline';
 
 /**
  * Family Assistant – setup family and two users.
- * Run: pnpm tsx scripts/setup-family.ts
- * Requires: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in env.
+ * Run: pnpm run setup-family
+ * Requires: SUPABASE_SERVICE_ROLE_KEY in .env
  */
+
+// Load .env file manually (no external dependency needed)
+function loadEnv(): void {
+  const envPath = path.resolve(process.cwd(), '.env');
+  if (fs.existsSync(envPath)) {
+    const content = fs.readFileSync(envPath, 'utf-8');
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eqIndex = trimmed.indexOf('=');
+      if (eqIndex === -1) continue;
+      const key = trimmed.slice(0, eqIndex).trim();
+      let value = trimmed.slice(eqIndex + 1).trim();
+      // Remove surrounding quotes if present
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  }
+}
+
+loadEnv();
+
 import { createClient } from '@supabase/supabase-js';
 
 const url = process.env.SUPABASE_URL ?? process.env.NUXT_PUBLIC_SUPABASE_URL;

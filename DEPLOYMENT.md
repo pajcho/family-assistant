@@ -18,8 +18,20 @@ Za lokalni razvoj možeš koristiti `NUXT_APP_BASE_URL=/` (bez subpath-a).
 
 ### 2. Baza (Supabase)
 
-1. U Supabase Dashboard → SQL Editor pokreni migraciju iz `supabase/migrations/20260130000000_initial_schema.sql`.
-2. Uključi Realtime na tabelama: Events → Database → Replication → uključi `events`, `payments`, `birthdays`, `expenses`.
+**Opcija A – Supabase CLI (preporučeno)**
+
+1. Instaliraj Supabase CLI: `brew install supabase/tap/supabase` ili `npm i -g supabase`.
+2. U projektu: `supabase link --project-ref tiokicffpbzqgrsqrkgt` (uneti DB lozinku kad zatraži; možeš je podesiti i preko `SUPABASE_DB_PASSWORD`).
+3. Pokreni migracije: `supabase db push`.
+4. Uključi Realtime na tabelama: Dashboard → Database → Replication → uključi `events`, `payments`, `birthdays`, `expenses`.
+
+**Opcija B – ručno u Dashboardu**
+
+1. U Supabase Dashboard → SQL Editor pokreni sadržaj fajla `supabase/migrations/20260130000000_initial_schema.sql`.
+2. Uključi Realtime na tabelama: Database → Replication → uključi `events`, `payments`, `birthdays`, `expenses`.
+
+**Kreiranje porodice i korisnika**
+
 3. Kreiraj porodicu i korisnike skriptom (koristi **service role** key samo lokalno, nikad u frontendu):
 
 ```bash

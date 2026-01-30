@@ -53,3 +53,6 @@ yarn-error.log*
 # Optional
 *.min.js
 *.min.css
+
+# Supabase CLI temp files
+supabase/.temp/
