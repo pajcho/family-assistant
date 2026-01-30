@@ -3,6 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",
@@ -10,11 +15,26 @@
     "check": "oxfmt --check && oxlint --deny-warnings",
     "prepare": "husky"
   },
+  "dependencies": {
+    "@heroicons/vue": "^2.2.0",
+    "@supabase/supabase-js": "^2.47.0",
+    "@tanstack/vue-query": "^5.59.0",
+    "@vueuse/core": "^11.2.0",
+    "axios": "^1.7.0",
+    "nuxt": "^3.14.0",
+    "vue": "^3.5.0",
+    "vue-router": "^4.4.0"
+  },
   "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.12.0",
+    "@peterbud/nuxt-query": "^1.4.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "oxfmt": "^0.27.0",
-    "oxlint": "^1.42.0"
+    "oxlint": "^1.42.0",
+    "shadcn-nuxt": "^2.4.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.6.0"
   },
   "lint-staged": {
     "*.{js,ts,mjs,cjs,jsx,tsx}": [
