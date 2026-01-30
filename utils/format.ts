@@ -18,3 +18,10 @@ export function formatTime(time: string): string {
 export function formatAmount(amount: number): string {
   return `${Number(amount).toLocaleString('sr-Latn-RS')} RSD`;
 }
+
+/** Add one month to YYYY-MM-DD string */
+export function addMonth(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setMonth(d.getMonth() + 1);
+  return d.toISOString().slice(0, 10);
+}
