@@ -1,8 +1,264 @@
 <template>
   <div>
-    <h1 class="text-2xl font-semibold text-gray-900">Događaji</h1>
-    <p class="mt-2 text-gray-600">Lista događaja će biti ovde.</p>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <h1 class="text-2xl font-semibold text-gray-900">Događaji</h1>
+      <Button @click="openAdd">
+        <PlusIcon class="mr-2 h-5 w-5" />
+        Dodaj događaj
+      </Button>
+    </div>
+
+    <div class="mt-4 flex flex-wrap gap-4 sm:flex-row">
+      <div class="flex items-center gap-2">
+        <Label
+          for="from"
+          class="shrink-0"
+        >
+          Od
+        </Label>
+        <Input
+          id="from"
+          v-model="filterFrom"
+          type="date"
+          class="w-40"
+        />
+      </div>
+      <div class="flex items-center gap-2">
+        <Label
+          for="to"
+          class="shrink-0"
+        >
+          Do
+        </Label>
+        <Input
+          id="to"
+          v-model="filterTo"
+          type="date"
+          class="w-40"
+        />
+      </div>
+      <Button
+        variant="secondary"
+        size="sm"
+        @click="clearFilters"
+      >
+        Prikaži sve
+      </Button>
+    </div>
+
+    <div
+      v-if="loading"
+      class="mt-6 text-gray-500"
+    >
+      Učitavanje…
+    </div>
+    <div
+      v-else-if="events.length === 0"
+      class="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-center text-gray-500"
+    >
+      Nema događaja za prikaz. Dodajte prvi događaj.
+    </div>
+    <ul
+      v-else
+      class="mt-6 space-y-3"
+    >
+      <li
+        v-for="ev in events"
+        :key="ev.id"
+        class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+      >
+        <div class="min-w-0 flex-1">
+          <p class="font-medium text-gray-900">{{ ev.name }}</p>
+          <p class="text-sm text-gray-600">
+            {{ formatDate(ev.date) }} · {{ formatTime(ev.start_time) }} –
+            {{ formatTime(ev.end_time) }}
+          </p>
+          <p
+            v-if="ev.description"
+            class="mt-1 text-sm text-gray-500"
+          >
+            {{ ev.description }}
+          </p>
+          <p
+            v-if="ev.notes"
+            class="mt-1 text-sm text-amber-700"
+          >
+            {{ ev.notes }}
+          </p>
+        </div>
+        <div class="flex shrink-0 gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            aria-label="Izmeni"
+            @click="openEdit(ev)"
+          >
+            <PencilIcon class="h-4 w-4" />
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            aria-label="Obriši"
+            @click="confirmDelete(ev)"
+          >
+            <TrashIcon class="h-4 w-4" />
+          </Button>
+        </div>
+      </li>
+    </ul>
+
+    <Dialog
+      v-model:open="dialogOpen"
+      title-id="event-dialog-title"
+    >
+      <DialogHeader>
+        <h2
+          id="event-dialog-title"
+          class="text-lg font-semibold"
+        >
+          {{ editingEvent ? 'Izmeni događaj' : 'Dodaj događaj' }}
+        </h2>
+      </DialogHeader>
+      <DialogContent>
+        <EventForm
+          :event="editingEvent"
+          @submit="onFormSubmit"
+          @cancel="dialogOpen = false"
+        />
+      </DialogContent>
+    </Dialog>
+
+    <Dialog
+      v-model:open="deleteDialogOpen"
+      title-id="delete-dialog-title"
+    >
+      <DialogHeader>
+        <h2
+          id="delete-dialog-title"
+          class="text-lg font-semibold"
+        >
+          Obriši događaj
+        </h2>
+      </DialogHeader>
+      <DialogContent>
+        <p class="text-gray-600">
+          Da li ste sigurni da želite da obrišete „{{ eventToDelete?.name }}”?
+        </p>
+      </DialogContent>
+      <DialogFooter>
+        <Button
+          variant="outline"
+          @click="deleteDialogOpen = false"
+        >
+          Otkaži
+        </Button>
+        <Button
+          variant="destructive"
+          :disabled="deleting"
+          @click="doDelete"
+        >
+          Obriši
+        </Button>
+      </DialogFooter>
+    </Dialog>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import type { Event } from '~/types/database';
+import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
+import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
+import EventForm from '~/components/events/EventForm.vue';
+import { formatDate, formatTime } from '~/utils/format';
+import { useEvents } from '~/composables/useEvents';
+import { useProfile } from '~/composables/useProfile';
+
+definePageMeta({ layout: 'default' });
+
+const { fetchProfile, familyId } = useProfile();
+const { fetchEvents, createEvent, updateEvent, deleteEvent } = useEvents();
+
+const events = ref<Event[]>([]);
+const loading = ref(true);
+const filterFrom = ref('');
+const filterTo = ref('');
+const dialogOpen = ref(false);
+const deleteDialogOpen = ref(false);
+const editingEvent = ref<Event | null>(null);
+const eventToDelete = ref<Event | null>(null);
+const deleting = ref(false);
+
+async function loadEvents(): Promise<void> {
+  await fetchProfile();
+  const fid = familyId.value;
+  if (!fid) {
+    loading.value = false;
+    return;
+  }
+  loading.value = true;
+  events.value = await fetchEvents(filterFrom.value || undefined, filterTo.value || undefined);
+  loading.value = false;
+}
+
+function openAdd(): void {
+  editingEvent.value = null;
+  dialogOpen.value = true;
+}
+
+function openEdit(ev: Event): void {
+  editingEvent.value = ev;
+  dialogOpen.value = true;
+}
+
+function clearFilters(): void {
+  filterFrom.value = '';
+  filterTo.value = '';
+  loadEvents();
+}
+
+async function onFormSubmit(
+  payload: Omit<Event, 'id' | 'family_id' | 'created_at' | 'updated_at'>,
+): Promise<void> {
+  if (editingEvent.value) {
+    const { error } = await updateEvent(editingEvent.value.id, payload);
+    if (!error) {
+      dialogOpen.value = false;
+      await loadEvents();
+    }
+  } else {
+    const { error } = await createEvent(payload);
+    if (!error) {
+      dialogOpen.value = false;
+      await loadEvents();
+    }
+  }
+}
+
+function confirmDelete(ev: Event): void {
+  eventToDelete.value = ev;
+  deleteDialogOpen.value = true;
+}
+
+async function doDelete(): Promise<void> {
+  if (!eventToDelete.value) return;
+  deleting.value = true;
+  const { error } = await deleteEvent(eventToDelete.value.id);
+  deleting.value = false;
+  if (!error) {
+    deleteDialogOpen.value = false;
+    eventToDelete.value = null;
+    await loadEvents();
+  }
+}
+
+watch([filterFrom, filterTo], () => {
+  loadEvents();
+});
+
+onMounted(() => {
+  loadEvents();
+});
+</script>
