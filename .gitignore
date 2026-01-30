@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+
+# Nuxt
+.nuxt/
+.output/
+dist/
+.nitro/
+.cache/
+
+# Build & misc
+*.local
+*.log
+*.tsbuildinfo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE - WebStorm / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# IDE - Cursor (project-level state)
+.cursor/
+
+# IDE - VSCode (if used alongside)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Testing & coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Debug
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Optional
+*.min.js
+*.min.css

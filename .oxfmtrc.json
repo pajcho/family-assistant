@@ -1,0 +1,68 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "bracketSpacing": true,
+  "bracketSameLine": false,
+  "arrowParens": "always",
+  "htmlWhitespaceSensitivity": "css",
+  "vueIndentScriptAndStyle": false,
+  "singleAttributePerLine": true,
+  "endOfLine": "lf",
+  "quoteProps": "as-needed",
+  "experimentalSortImports": {
+    "groups": [
+      ["side-effect"],
+      ["builtin"],
+      ["external", "type-external"],
+      ["internal", "type-internal"],
+      ["parent", "type-parent"],
+      ["sibling", "type-sibling"],
+      ["index", "type-index"]
+    ],
+    "internalPattern": ["~/**", "@/**", "#**"],
+    "newlinesBetween": true,
+    "ignoreCase": true,
+    "order": "asc"
+  },
+  "experimentalSortPackageJson": {
+    "sortScripts": false
+  },
+  "experimentalTailwindcss": {
+    "attributes": ["class", ":class", "className"],
+    "functions": ["clsx", "cn", "cva", "twMerge", "twJoin"],
+    "preserveWhitespace": true,
+    "preserveDuplicates": false
+  },
+  "ignorePatterns": [
+    "node_modules",
+    ".nuxt",
+    ".output",
+    "dist",
+    "public",
+    "*.min.js",
+    "pnpm-lock.yaml",
+    "package-lock.json",
+    "yarn.lock",
+    "*.d.ts"
+  ],
+  "overrides": [
+    {
+      "files": ["*.vue"],
+      "options": {
+        "singleAttributePerLine": true,
+        "htmlWhitespaceSensitivity": "ignore"
+      }
+    },
+    {
+      "files": ["*.md"],
+      "options": {
+        "proseWrap": "preserve"
+      }
+    }
+  ]
+}

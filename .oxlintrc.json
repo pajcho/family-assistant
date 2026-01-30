@@ -1,0 +1,91 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "vue", "promise", "import"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "rules": {
+    "no-console": "warn",
+    "no-debugger": "error",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-unused-vars": "error",
+    "import/no-duplicates": "error",
+    "import/no-cycle": "error",
+    "promise/no-return-wrap": "error",
+    "vue/no-unused-vars": "error",
+    "vue/no-ref-as-operand": "error"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "globals": {
+    "defineNuxtConfig": "readonly",
+    "definePageMeta": "readonly",
+    "defineNuxtRouteMiddleware": "readonly",
+    "useRuntimeConfig": "readonly",
+    "useFetch": "readonly",
+    "useAsyncData": "readonly",
+    "useState": "readonly",
+    "useHead": "readonly",
+    "useSeoMeta": "readonly",
+    "navigateTo": "readonly",
+    "abortNavigation": "readonly",
+    "$fetch": "readonly",
+    "useNuxtApp": "readonly",
+    "useRoute": "readonly",
+    "useRouter": "readonly",
+    "useCookie": "readonly",
+    "useRequestHeaders": "readonly",
+    "useRequestEvent": "readonly",
+    "useRequestURL": "readonly",
+    "useLazyFetch": "readonly",
+    "useLazyAsyncData": "readonly",
+    "refreshNuxtData": "readonly",
+    "clearNuxtData": "readonly",
+    "setPageLayout": "readonly",
+    "setResponseStatus": "readonly",
+    "prerenderRoutes": "readonly",
+    "defineNuxtPlugin": "readonly",
+    "defineNuxtComponent": "readonly",
+    "defineAppConfig": "readonly",
+    "defineEventHandler": "readonly",
+    "defineCachedEventHandler": "readonly",
+    "defineNitroPlugin": "readonly",
+    "createError": "readonly",
+    "showError": "readonly",
+    "clearError": "readonly",
+    "isNuxtError": "readonly",
+    "useError": "readonly"
+  },
+  "settings": {
+    "vue": {
+      "version": 3
+    }
+  },
+  "ignorePatterns": ["node_modules", ".nuxt", ".output", "dist", "public", "*.min.js", "*.d.ts"],
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.spec.ts", "**/tests/**", "**/__tests__/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["server/**/*.ts", "server/**/*.js"],
+      "env": {
+        "browser": false,
+        "node": true
+      }
+    },
+    {
+      "files": ["*.config.ts", "*.config.js", "nuxt.config.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
+}

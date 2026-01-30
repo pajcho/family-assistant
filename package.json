@@ -1,0 +1,32 @@
+{
+  "name": "family-assistant",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "check": "oxfmt --check && oxlint --deny-warnings",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "oxfmt": "^0.27.0",
+    "oxlint": "^1.42.0"
+  },
+  "lint-staged": {
+    "*.{js,ts,mjs,cjs,jsx,tsx}": [
+      "oxlint --fix",
+      "oxfmt"
+    ],
+    "*.vue": [
+      "oxlint --fix",
+      "oxfmt"
+    ],
+    "*.{json,yaml,yml,md,html,css,scss}": [
+      "oxfmt --no-error-on-unmatched-pattern"
+    ]
+  }
+}
