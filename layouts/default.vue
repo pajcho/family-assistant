@@ -1,9 +1,13 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <slot />
+    <AppNav v-if="showNav" />
+    <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <slot />
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-// Default layout – slot for page content
+const route = useRoute();
+const showNav = computed(() => route.path !== '/login');
 </script>
