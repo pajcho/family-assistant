@@ -13,7 +13,7 @@
 import { cn } from '~/utils/cn';
 
 interface Props {
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link';
+  variant?: 'default' | 'secondary' | 'destructive' | 'success' | 'outline' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   disabled?: boolean;
   as?: string;
@@ -35,6 +35,7 @@ const variantClass: Record<string, string> = {
   default: 'bg-blue-600 text-white hover:bg-blue-700',
   secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300',
   destructive: 'bg-red-600 text-white hover:bg-red-700',
+  success: 'bg-emerald-600 text-white hover:bg-emerald-700',
   outline: 'border border-gray-300 bg-white hover:bg-gray-50',
   ghost: 'hover:bg-gray-100',
   link: 'text-blue-600 underline-offset-4 hover:underline',

@@ -1,5 +1,5 @@
 <template>
-  <Card>
+  <Card class="flex h-full flex-col">
     <CardHeader class="pb-2">
       <div class="flex items-center gap-2">
         <CakeIcon
@@ -9,7 +9,7 @@
         <CardTitle class="text-sm font-medium text-gray-600">Rođendani (30 dana)</CardTitle>
       </div>
     </CardHeader>
-    <CardContent>
+    <CardContent class="flex flex-1 flex-col">
       <!-- Upcoming birthdays list -->
       <div
         v-if="upcomingBirthdays.length > 0"
@@ -39,7 +39,7 @@
         Nema rođendana u narednih 30 dana
       </p>
 
-      <div class="mt-3 flex flex-wrap gap-2">
+      <div class="mt-auto flex flex-wrap gap-2 pt-4">
         <Button
           size="sm"
           @click="$emit('add')"
