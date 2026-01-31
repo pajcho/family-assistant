@@ -214,6 +214,39 @@
       </li>
     </ul>
 
+    <!-- Summary section -->
+    <div
+      v-if="combinedList.length > 0"
+      class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800"
+    >
+      <template v-if="summary.type === 'all'">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
+            Ukupno za platiti:
+          </span>
+          <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {{ formatAmount(summary.total) }}
+          </span>
+        </div>
+      </template>
+      <template v-else>
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div class="flex items-center justify-between sm:gap-2">
+            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Za platiti:</span>
+            <span class="font-semibold text-amber-700 dark:text-amber-400">
+              {{ formatAmount(summary.unpaidTotal) }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between sm:gap-2">
+            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Plaćeno:</span>
+            <span class="font-semibold text-emerald-700 dark:text-emerald-400">
+              {{ formatAmount(summary.paidTotal) }}
+            </span>
+          </div>
+        </div>
+      </template>
+    </div>
+
     <Dialog
       v-model:open="dialogOpen"
       title-id="payment-dialog-title"
@@ -468,6 +501,40 @@ const combinedList = computed<ListItem[]>(() => {
   items.sort((a, b) => a.due_date.localeCompare(b.due_date));
 
   return items;
+});
+
+// Summary computed properties
+const summary = computed(() => {
+  if (selectedMonth.value === 'all') {
+    // For "all" tab, show total future payments (not paid, not paused)
+    const total = allPayments.value
+      .filter((p) => !p.is_paid && !p.is_paused)
+      .reduce((sum, p) => sum + p.amount, 0);
+    return { type: 'all' as const, total };
+  }
+
+  // For specific month, show unpaid + paid amounts
+  let unpaidTotal = 0;
+  let paidTotal = 0;
+
+  // Count payments for this month
+  for (const p of allPayments.value) {
+    if (!p.due_date.startsWith(selectedMonth.value)) continue;
+    if (p.is_paused) continue;
+    if (p.is_paid) {
+      paidTotal += p.amount;
+    } else {
+      unpaidTotal += p.amount;
+    }
+  }
+
+  // Count history entries for this month
+  for (const h of allHistory.value) {
+    if (!h.due_date.startsWith(selectedMonth.value)) continue;
+    paidTotal += h.amount;
+  }
+
+  return { type: 'month' as const, unpaidTotal, paidTotal };
 });
 
 function getItemClass(item: ListItem): string {
