@@ -141,6 +141,11 @@
                   @click="handleTogglePause(item)"
                 />
                 <DropdownItem
+                  label="Istorija"
+                  :icon="ClockIcon"
+                  @click="openHistory(item)"
+                />
+                <DropdownItem
                   label="Izmeni"
                   :icon="PencilIcon"
                   @click="openEdit(item)"
@@ -185,6 +190,14 @@
               <Button
                 variant="outline"
                 size="sm"
+                @click="openHistory(item)"
+              >
+                <ClockIcon class="mr-1 h-4 w-4" />
+                Istorija
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 @click="openEdit(item)"
               >
                 <PencilIcon class="mr-1 h-4 w-4" />
@@ -203,6 +216,11 @@
         </div>
       </li>
     </ul>
+
+    <PaymentHistoryPopup
+      v-model:open="historyPopupOpen"
+      :payment="selectedPaymentForHistory"
+    />
 
     <!-- Summary section -->
     <div
@@ -343,12 +361,14 @@ import {
   PlayIcon,
   PauseIcon,
   ArrowUturnLeftIcon,
+  ClockIcon,
 } from '@heroicons/vue/24/outline';
 import type { Payment, PaymentHistory, RecurrencePeriod } from '~/types/database';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
 import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import PaymentForm from '~/components/payments/PaymentForm.vue';
+import PaymentHistoryPopup from '~/components/payments/PaymentHistoryPopup.vue';
 import { formatDate, formatAmount } from '~/utils/format';
 import { usePayments } from '~/composables/usePayments';
 import { useProfile } from '~/composables/useProfile';
@@ -399,6 +419,13 @@ const deleting = ref(false);
 const undoDialogOpen = ref(false);
 const historyToUndo = ref<HistoryListItem | null>(null);
 const undoing = ref(false);
+const historyPopupOpen = ref(false);
+const selectedPaymentForHistory = ref<Payment | null>(null);
+
+function openHistory(payment: Payment): void {
+  selectedPaymentForHistory.value = payment;
+  historyPopupOpen.value = true;
+}
 
 // Serbian month names
 const monthNames = [

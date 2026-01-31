@@ -117,6 +117,12 @@
         Zatvori
       </Button>
       <Button
+        variant="outline"
+        @click="openHistory"
+      >
+        Istorija
+      </Button>
+      <Button
         v-if="selectedPayment && !selectedPayment.is_paid"
         variant="success"
         :disabled="markingPaid"
@@ -127,6 +133,11 @@
       <Button @click="handleEdit">Izmeni</Button>
     </DialogFooter>
   </Dialog>
+
+  <PaymentHistoryPopup
+    v-model:open="historyOpen"
+    :payment="selectedPayment"
+  />
 </template>
 
 <script setup lang="ts">
@@ -136,6 +147,7 @@ import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
 import DashboardCard from '~/components/dashboard/DashboardCard.vue';
 import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
+import PaymentHistoryPopup from '~/components/payments/PaymentHistoryPopup.vue';
 import { formatDate, formatAmount } from '~/utils/format';
 import { usePayments } from '~/composables/usePayments';
 
@@ -159,6 +171,11 @@ function handleEdit(): void {
 const detailOpen = ref(false);
 const selectedPayment = ref<Payment | null>(null);
 const markingPaid = ref(false);
+const historyOpen = ref(false);
+
+function openHistory(): void {
+  historyOpen.value = true;
+}
 
 async function handleMarkAsPaid(): Promise<void> {
   if (!selectedPayment.value) return;

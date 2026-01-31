@@ -41,6 +41,16 @@ export function usePayments() {
     return (data as PaymentHistory[]) ?? [];
   }
 
+  async function fetchPaymentHistoryByPaymentId(paymentId: string): Promise<PaymentHistory[]> {
+    const { data, error } = await supabase
+      .from('payment_history')
+      .select('*')
+      .eq('payment_id', paymentId)
+      .order('paid_date', { ascending: false });
+    if (error) return [];
+    return (data as PaymentHistory[]) ?? [];
+  }
+
   async function hasPaymentHistory(paymentId: string): Promise<boolean> {
     const { count, error } = await supabase
       .from('payment_history')
@@ -314,6 +324,7 @@ export function usePayments() {
   return {
     fetchPayments,
     fetchPaymentHistory,
+    fetchPaymentHistoryByPaymentId,
     hasPaymentHistory,
     getLastHistoryEntry,
     undoLastPayment,
