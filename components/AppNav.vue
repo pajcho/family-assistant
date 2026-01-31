@@ -6,9 +6,14 @@
       <div class="flex items-center gap-6">
         <NuxtLink
           to="/"
-          class="text-lg font-semibold text-gray-900 dark:text-white"
+          class="flex items-center gap-2"
+          aria-label="Početna"
         >
-          Porodični asistent
+          <div
+            class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 dark:bg-blue-500"
+          >
+            <UserGroupIcon class="h-5 w-5 text-white" />
+          </div>
         </NuxtLink>
         <div class="hidden gap-1 sm:flex">
           <NavLink
@@ -97,6 +102,7 @@ import {
   CakeIcon,
   ShoppingBagIcon,
   ArrowRightOnRectangleIcon,
+  UserGroupIcon,
 } from '@heroicons/vue/24/outline';
 import { Button } from '~/components/ui/button';
 import NavLink from '~/components/AppNavLink.vue';

@@ -1,6 +1,8 @@
 <template>
   <div>
-    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Kontrolna tabla</h1>
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">
+      {{ familyName ? `Porodica ${familyName}` : 'Kontrolna tabla' }}
+    </h1>
     <p class="mt-1 text-gray-600 dark:text-gray-400">
       Dobrodošli nazad! Pregled nadolazećih obaveza.
     </p>
@@ -170,7 +172,7 @@ import { useExpenses } from '~/composables/useExpenses';
 
 definePageMeta({ layout: 'default' });
 
-const { familyId, fetchProfile } = useProfile();
+const { familyId, familyName, fetchProfile } = useProfile();
 const supabase = useSupabase();
 
 // Composables for CRUD operations

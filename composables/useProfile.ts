@@ -1,4 +1,4 @@
-import type { Profile } from '~/types/database';
+import type { Profile, Family } from '~/types/database';
 
 export function useProfile() {
   const supabase = useSupabase();
@@ -6,7 +6,9 @@ export function useProfile() {
 
   // Use useState to share profile across components
   const profile = useState<Profile | null>('user-profile', () => null);
+  const family = useState<Family | null>('user-family', () => null);
   const familyId = computed(() => profile.value?.family_id ?? null);
+  const familyName = computed(() => family.value?.name ?? null);
 
   async function fetchProfile(): Promise<Profile | null> {
     // Return cached if already fetched
@@ -18,12 +20,28 @@ export function useProfile() {
     const { data, error } = await supabase.from('profiles').select('*').eq('id', uid).single();
     if (error) return null;
     profile.value = data as Profile;
+
+    // Also fetch family data
+    if (profile.value?.family_id) {
+      await fetchFamily(profile.value.family_id);
+    }
+
     return profile.value;
+  }
+
+  async function fetchFamily(fid: string): Promise<Family | null> {
+    if (family.value?.id === fid) return family.value;
+
+    const { data, error } = await supabase.from('families').select('*').eq('id', fid).single();
+    if (error) return null;
+    family.value = data as Family;
+    return family.value;
   }
 
   function clearProfile(): void {
     profile.value = null;
+    family.value = null;
   }
 
-  return { profile, familyId, fetchProfile, clearProfile };
+  return { profile, family, familyId, familyName, fetchProfile, clearProfile };
 }
