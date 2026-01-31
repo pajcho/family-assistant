@@ -14,16 +14,26 @@
         v-for="e in upcomingEvents.slice(0, 3)"
         :key="e.id"
         type="button"
-        class="flex w-full items-center justify-between rounded-md bg-blue-50 px-3 py-2 text-left text-sm transition-colors hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50"
+        :class="[
+          'flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors',
+          'bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50',
+          isEventEnded(e) && 'opacity-70',
+        ]"
         @click="openDetail(e)"
       >
-        <span class="min-w-0 flex-1">
+        <span
+          class="min-w-0 flex-1"
+          :class="{ 'opacity-50': isEventEnded(e) }"
+        >
           <span class="font-medium text-gray-900 dark:text-gray-100">{{ e.name }}</span>
           <span class="ml-1.5 text-xs text-gray-500 dark:text-gray-400">
             {{ formatTime(e.start_time) }}–{{ formatTime(e.end_time) }}
           </span>
         </span>
-        <span class="shrink-0 text-blue-700 dark:text-blue-400">
+        <span
+          class="shrink-0 text-blue-700 dark:text-blue-400"
+          :class="{ 'opacity-50': isEventEnded(e) }"
+        >
           {{ eventDateLabel(e.date) }}
         </span>
       </button>
@@ -135,7 +145,6 @@ function handleEdit(): void {
     emit('edit', selectedEvent.value);
   }
 }
-
 // Filter events within 14 days and sort by date
 const upcomingEvents = computed(() => {
   const today = new Date();
@@ -150,6 +159,21 @@ const upcomingEvents = computed(() => {
     })
     .toSorted((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
 });
+
+/** True if event has already ended (past date, or today but end_time has passed). */
+function isEventEnded(event: Event): boolean {
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const eventDateStart = new Date(event.date + 'T00:00:00');
+  if (eventDateStart < todayStart) return true;
+  if (eventDateStart > todayStart) return false;
+  const endTimeStr = event.end_time ?? '23:59';
+  const endDateTime = new Date(
+    event.date + 'T' + (endTimeStr.length === 5 ? endTimeStr + ':00' : endTimeStr),
+  );
+  return now >= endDateTime;
+}
 
 function eventDateLabel(dateStr: string): string {
   const today = new Date();
