@@ -120,6 +120,12 @@
         </h2>
       </DialogHeader>
       <DialogContent>
+        <div
+          v-if="errorMessage"
+          class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
+        >
+          {{ errorMessage }}
+        </div>
         <EventForm
           :event="editingEvent"
           @submit="onFormSubmit"
@@ -190,6 +196,7 @@ const deleteDialogOpen = ref(false);
 const editingEvent = ref<Event | null>(null);
 const eventToDelete = ref<Event | null>(null);
 const deleting = ref(false);
+const errorMessage = ref('');
 
 async function loadEvents(): Promise<void> {
   await fetchProfile();
@@ -205,11 +212,13 @@ async function loadEvents(): Promise<void> {
 
 function openAdd(): void {
   editingEvent.value = null;
+  errorMessage.value = '';
   dialogOpen.value = true;
 }
 
 function openEdit(ev: Event): void {
   editingEvent.value = ev;
+  errorMessage.value = '';
   dialogOpen.value = true;
 }
 
@@ -222,18 +231,23 @@ function clearFilters(): void {
 async function onFormSubmit(
   payload: Omit<Event, 'id' | 'family_id' | 'created_at' | 'updated_at'>,
 ): Promise<void> {
+  errorMessage.value = '';
   if (editingEvent.value) {
     const { error } = await updateEvent(editingEvent.value.id, payload);
-    if (!error) {
-      dialogOpen.value = false;
-      await loadEvents();
+    if (error) {
+      errorMessage.value = error.message || 'Greška pri ažuriranju događaja';
+      return;
     }
+    dialogOpen.value = false;
+    await loadEvents();
   } else {
     const { error } = await createEvent(payload);
-    if (!error) {
-      dialogOpen.value = false;
-      await loadEvents();
+    if (error) {
+      errorMessage.value = error.message || 'Greška pri kreiranju događaja';
+      return;
     }
+    dialogOpen.value = false;
+    await loadEvents();
   }
 }
 

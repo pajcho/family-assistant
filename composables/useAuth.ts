@@ -1,12 +1,21 @@
 import type { User, Session } from '@supabase/supabase-js';
 
+// Track if auth listener is already set up (module-level, survives HMR)
+let listenerAttached = false;
+
 export function useAuth() {
   const router = useRouter();
-  const user = ref<User | null>(null);
-  const session = ref<Session | null>(null);
-  const loading = ref(true);
+
+  // Use useState to share state across all components
+  const user = useState<User | null>('auth-user', () => null);
+  const session = useState<Session | null>('auth-session', () => null);
+  const loading = useState<boolean>('auth-loading', () => true);
+  const initialized = useState<boolean>('auth-initialized', () => false);
 
   async function init(): Promise<void> {
+    // Skip if already initialized
+    if (initialized.value) return;
+
     try {
       const supabase = useSupabase();
       const {
@@ -15,10 +24,16 @@ export function useAuth() {
       session.value = s;
       user.value = s?.user ?? null;
 
-      supabase.auth.onAuthStateChange((_event, s) => {
-        session.value = s;
-        user.value = s?.user ?? null;
-      });
+      // Only attach listener once
+      if (!listenerAttached) {
+        listenerAttached = true;
+        supabase.auth.onAuthStateChange((_event, s) => {
+          session.value = s;
+          user.value = s?.user ?? null;
+        });
+      }
+
+      initialized.value = true;
     } catch {
       session.value = null;
       user.value = null;
@@ -39,13 +54,22 @@ export function useAuth() {
   }
 
   async function logout(): Promise<void> {
+    // Get profile state to clear it
+    const profile = useState<unknown>('user-profile');
+
     try {
       const supabase = useSupabase();
       await supabase.auth.signOut();
-      await router.push('/login');
     } catch {
-      await router.push('/login');
+      // Continue with cleanup even if sign out fails
     }
+
+    // Clear all state
+    session.value = null;
+    user.value = null;
+    initialized.value = false;
+    profile.value = null;
+    await router.push('/login');
   }
 
   const isAuthenticated = computed(() => !!session.value);

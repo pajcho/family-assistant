@@ -28,7 +28,4 @@ export default defineNuxtConfig({
   typescript: {
     strict: true,
   },
-  router: {
-    middleware: ['auth'],
-  },
 });

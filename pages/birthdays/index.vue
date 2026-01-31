@@ -72,6 +72,12 @@
         </h2>
       </DialogHeader>
       <DialogContent>
+        <div
+          v-if="errorMessage"
+          class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
+        >
+          {{ errorMessage }}
+        </div>
         <BirthdayForm
           :birthday="editingBirthday"
           @submit="onFormSubmit"
@@ -138,6 +144,7 @@ const deleteDialogOpen = ref(false);
 const editingBirthday = ref<Birthday | null>(null);
 const birthdayToDelete = ref<Birthday | null>(null);
 const deleting = ref(false);
+const errorMessage = ref('');
 
 const sortedBirthdays = computed(() => {
   return birthdays.value.toSorted(
@@ -158,11 +165,13 @@ async function loadBirthdays(): Promise<void> {
 
 function openAdd(): void {
   editingBirthday.value = null;
+  errorMessage.value = '';
   dialogOpen.value = true;
 }
 
 function openEdit(b: Birthday): void {
   editingBirthday.value = b;
+  errorMessage.value = '';
   dialogOpen.value = true;
 }
 
@@ -171,18 +180,23 @@ async function onFormSubmit(payload: {
   description?: string;
   birth_date: string;
 }): Promise<void> {
+  errorMessage.value = '';
   if (editingBirthday.value) {
     const { error } = await updateBirthday(editingBirthday.value.id, payload);
-    if (!error) {
-      dialogOpen.value = false;
-      await loadBirthdays();
+    if (error) {
+      errorMessage.value = error.message || 'Greška pri ažuriranju rođendana';
+      return;
     }
+    dialogOpen.value = false;
+    await loadBirthdays();
   } else {
     const { error } = await createBirthday(payload);
-    if (!error) {
-      dialogOpen.value = false;
-      await loadBirthdays();
+    if (error) {
+      errorMessage.value = error.message || 'Greška pri kreiranju rođendana';
+      return;
     }
+    dialogOpen.value = false;
+    await loadBirthdays();
   }
 }
 
