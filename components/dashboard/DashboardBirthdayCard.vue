@@ -1,29 +1,23 @@
 <template>
   <DashboardCard
     :icon="CakeIcon"
-    title="Rođendani (30 dana)"
-    empty-message="Nema rođendana u narednih 30 dana"
+    title="Sledeći rođendani"
+    empty-message="Nema nadolazećih rođendana"
     add-label="Dodaj rođendan"
     view-all-link="/birthdays"
-    :has-items="upcomingBirthdays.length > 0"
+    :has-items="displayBirthdays.length > 0"
     variant="emerald"
     @add="$emit('add')"
   >
     <template #items>
       <DashboardCardItem
-        v-for="b in upcomingBirthdays.slice(0, 3)"
+        v-for="b in displayBirthdays"
         :key="b.id"
         :label="b.name"
         :value="daysLabel(b.birth_date)"
         variant="emerald"
         @click="openDetail(b)"
       />
-      <p
-        v-if="upcomingBirthdays.length > 3"
-        class="text-xs text-gray-500 dark:text-gray-400"
-      >
-        + još {{ upcomingBirthdays.length - 3 }}
-      </p>
     </template>
   </DashboardCard>
 
@@ -136,11 +130,21 @@ function handleEdit(): void {
   }
 }
 
-// Filter birthdays within 30 days and sort by days until
-const upcomingBirthdays = computed(() => {
-  return props.birthdays
-    .filter((b) => daysUntilBirthday(b.birth_date) <= 30)
-    .toSorted((a, b) => daysUntilBirthday(a.birth_date) - daysUntilBirthday(b.birth_date));
+// All birthdays sorted by next occurrence (days until)
+const allSortedBirthdays = computed(() => {
+  return [...props.birthdays].toSorted(
+    (a, b) => daysUntilBirthday(a.birth_date) - daysUntilBirthday(b.birth_date),
+  );
+});
+
+// First 3 upcoming; if the 3rd shares its date with more, show all on that day
+const displayBirthdays = computed(() => {
+  const sorted = allSortedBirthdays.value;
+  if (sorted.length === 0) return [];
+  if (sorted.length <= 3) return sorted;
+  const third = sorted[2];
+  const thirdNextDate = nextBirthdayDate(third.birth_date).getTime();
+  return sorted.filter((b) => nextBirthdayDate(b.birth_date).getTime() <= thirdNextDate);
 });
 
 function daysLabel(birthDate: string): string {
