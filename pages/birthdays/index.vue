@@ -27,34 +27,38 @@
       <li
         v-for="b in sortedBirthdays"
         :key="b.id"
-        class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
       >
-        <div class="min-w-0 flex-1">
-          <p class="font-medium text-gray-900">{{ birthdayDisplayText(b.name, b.birth_date) }}</p>
-          <p
-            v-if="b.description"
-            class="mt-1 text-sm text-gray-500"
-          >
-            {{ b.description }}
-          </p>
-        </div>
-        <div class="flex shrink-0 gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            aria-label="Izmeni"
-            @click="openEdit(b)"
-          >
-            <PencilIcon class="h-4 w-4" />
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            aria-label="Obriši"
-            @click="confirmDelete(b)"
-          >
-            <TrashIcon class="h-4 w-4" />
-          </Button>
+        <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
+          <div class="min-w-0 flex-1">
+            <p class="font-medium text-gray-900">{{ birthdayDisplayText(b.name, b.birth_date) }}</p>
+            <p
+              v-if="b.description"
+              class="mt-1 text-sm text-gray-500"
+            >
+              {{ b.description }}
+            </p>
+          </div>
+          <div class="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap">
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label="Izmeni"
+              @click="openEdit(b)"
+            >
+              <PencilIcon class="h-4 w-4 sm:mr-1" />
+              <span class="hidden sm:inline">Izmeni</span>
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              aria-label="Obriši"
+              @click="confirmDelete(b)"
+            >
+              <TrashIcon class="h-4 w-4 sm:mr-1" />
+              <span class="hidden sm:inline">Obriši</span>
+            </Button>
+          </div>
         </div>
       </li>
     </ul>

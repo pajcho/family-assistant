@@ -40,55 +40,71 @@
     </div>
     <ul
       v-else
+      ref="listRef"
       class="mt-6 space-y-3"
     >
       <li
         v-for="e in expenses"
         :key="e.id"
-        class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+        :data-id="e.id"
+        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
         :class="{ 'opacity-60': e.is_paid }"
       >
-        <div class="min-w-0 flex-1">
-          <p class="font-medium text-gray-900">{{ e.name }}</p>
-          <p class="text-sm text-gray-600">{{ formatAmount(e.amount) }}</p>
-          <p
-            v-if="e.description"
-            class="mt-1 text-sm text-gray-500"
+        <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
+          <!-- Drag handle -->
+          <div
+            class="drag-handle flex cursor-grab items-center py-2 text-gray-400 active:cursor-grabbing"
           >
-            {{ e.description }}
-          </p>
-          <p
-            v-if="e.is_paid && e.paid_date"
-            class="mt-1 text-sm text-gray-500"
-          >
-            Kupljeno {{ formatDate(e.paid_date) }}
-          </p>
-        </div>
-        <div class="flex shrink-0 items-center gap-2">
-          <template v-if="!e.is_paid">
-            <Button
-              size="sm"
-              @click="markPaid(e)"
+            <Bars3Icon class="h-5 w-5" />
+          </div>
+
+          <!-- Content -->
+          <div class="min-w-0 flex-1">
+            <p class="font-medium text-gray-900">{{ e.name }}</p>
+            <p class="text-sm text-gray-600">{{ formatAmount(e.amount) }}</p>
+            <p
+              v-if="e.description"
+              class="mt-1 text-sm text-gray-500"
             >
-              Označi kao plaćeno
+              {{ e.description }}
+            </p>
+            <p
+              v-if="e.is_paid && e.paid_date"
+              class="mt-1 text-sm text-gray-500"
+            >
+              Kupljeno {{ formatDate(e.paid_date) }}
+            </p>
+          </div>
+
+          <!-- Action buttons - below content on mobile, right side on desktop -->
+          <div class="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap">
+            <template v-if="!e.is_paid">
+              <Button
+                size="sm"
+                @click="markPaid(e)"
+              >
+                Plaćeno
+              </Button>
+            </template>
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label="Izmeni"
+              @click="openEdit(e)"
+            >
+              <PencilIcon class="h-4 w-4 sm:mr-1" />
+              <span class="hidden sm:inline">Izmeni</span>
             </Button>
-          </template>
-          <Button
-            variant="outline"
-            size="sm"
-            aria-label="Izmeni"
-            @click="openEdit(e)"
-          >
-            <PencilIcon class="h-4 w-4" />
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            aria-label="Obriši"
-            @click="confirmDelete(e)"
-          >
-            <TrashIcon class="h-4 w-4" />
-          </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              aria-label="Obriši"
+              @click="confirmDelete(e)"
+            >
+              <TrashIcon class="h-4 w-4 sm:mr-1" />
+              <span class="hidden sm:inline">Obriši</span>
+            </Button>
+          </div>
         </div>
       </li>
     </ul>
@@ -128,7 +144,7 @@
       </DialogHeader>
       <DialogContent>
         <p class="text-gray-600">
-          Da li ste sigurni da želite da obrišete „{{ expenseToDelete?.name }}”?
+          Da li ste sigurni da želite da obrišete „{{ expenseToDelete?.name }}"?
         </p>
       </DialogContent>
       <DialogFooter>
@@ -151,7 +167,8 @@
 </template>
 
 <script setup lang="ts">
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import { Sortable } from 'sortablejs';
+import { PlusIcon, PencilIcon, TrashIcon, Bars3Icon } from '@heroicons/vue/24/outline';
 import type { Expense } from '~/types/database';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
@@ -163,7 +180,8 @@ import { useProfile } from '~/composables/useProfile';
 definePageMeta({ layout: 'default' });
 
 const { fetchProfile, familyId } = useProfile();
-const { fetchExpenses, createExpense, updateExpense, deleteExpense, markAsPaid } = useExpenses();
+const { fetchExpenses, createExpense, updateExpense, deleteExpense, markAsPaid, reorderExpenses } =
+  useExpenses();
 
 const expenses = ref<Expense[]>([]);
 const loading = ref(true);
@@ -173,6 +191,8 @@ const deleteDialogOpen = ref(false);
 const editingExpense = ref<Expense | null>(null);
 const expenseToDelete = ref<Expense | null>(null);
 const deleting = ref(false);
+const listRef = ref<HTMLUListElement | null>(null);
+let sortableInstance: Sortable | null = null;
 
 const unpaidTotal = computed(() =>
   expenses.value.filter((e) => !e.is_paid).reduce((sum, e) => sum + Number(e.amount), 0),
@@ -187,6 +207,36 @@ async function loadExpenses(): Promise<void> {
   loading.value = true;
   expenses.value = await fetchExpenses(hidePaid.value);
   loading.value = false;
+}
+
+function initSortable(): void {
+  if (!listRef.value) return;
+  if (sortableInstance) {
+    sortableInstance.destroy();
+  }
+  sortableInstance = Sortable.create(listRef.value, {
+    animation: 150,
+    handle: '.drag-handle',
+    ghostClass: 'opacity-50',
+    onEnd: async (evt) => {
+      if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+      if (evt.oldIndex === evt.newIndex) return;
+
+      // Get the reordered list
+      const items = [...expenses.value];
+      const [moved] = items.splice(evt.oldIndex, 1);
+      items.splice(evt.newIndex, 0, moved);
+
+      // Update sort_order for all items
+      const updates = items.map((item, index) => ({
+        id: item.id,
+        sort_order: index + 1,
+      }));
+
+      await reorderExpenses(updates);
+      await loadExpenses();
+    },
+  });
 }
 
 function openAdd(): void {
@@ -245,7 +295,25 @@ watch(hidePaid, () => {
   loadExpenses();
 });
 
-onMounted(() => {
-  loadExpenses();
+watch(
+  () => expenses.value.length,
+  () => {
+    nextTick(() => {
+      initSortable();
+    });
+  },
+);
+
+onMounted(async () => {
+  await loadExpenses();
+  nextTick(() => {
+    initSortable();
+  });
+});
+
+onUnmounted(() => {
+  if (sortableInstance) {
+    sortableInstance.destroy();
+  }
 });
 </script>

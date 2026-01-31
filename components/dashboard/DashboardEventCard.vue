@@ -117,9 +117,7 @@
       >
         Zatvori
       </Button>
-      <NuxtLink to="/events">
-        <Button @click="detailOpen = false">Izmeni</Button>
-      </NuxtLink>
+      <Button @click="handleEdit">Izmeni</Button>
     </DialogFooter>
   </Dialog>
 </template>
@@ -138,10 +136,17 @@ interface Props {
 
 const props = defineProps<Props>();
 
-defineEmits<{ add: [] }>();
+const emit = defineEmits<{ add: []; edit: [event: Event] }>();
 
 const detailOpen = ref(false);
 const selectedEvent = ref<Event | null>(null);
+
+function handleEdit(): void {
+  if (selectedEvent.value) {
+    detailOpen.value = false;
+    emit('edit', selectedEvent.value);
+  }
+}
 
 // Filter events within 14 days and sort by date
 const upcomingEvents = computed(() => {

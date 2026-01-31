@@ -16,33 +16,37 @@
       <DashboardEventCard
         :events="allEvents"
         @add="openAddEvent"
+        @edit="openEditEvent"
       />
       <DashboardPaymentCard
         :payments="allPayments"
         @add="openAddPayment"
         @updated="loadPayments"
+        @edit="openEditPayment"
       />
       <DashboardBirthdayCard
         :birthdays="allBirthdays"
         @add="openAddBirthday"
+        @edit="openEditBirthday"
       />
       <DashboardExpenseCard
         :expenses="allExpenses"
         @add="openAddExpense"
+        @edit="openEditExpense"
       />
     </div>
 
-    <!-- Add Event Dialog -->
+    <!-- Event Dialog (Add/Edit) -->
     <Dialog
-      v-model:open="addEventOpen"
-      title-id="add-event-title"
+      v-model:open="eventDialogOpen"
+      title-id="event-dialog-title"
     >
       <DialogHeader>
         <h2
-          id="add-event-title"
+          id="event-dialog-title"
           class="text-lg font-semibold"
         >
-          Dodaj događaj
+          {{ editingEvent ? 'Izmeni događaj' : 'Dodaj događaj' }}
         </h2>
       </DialogHeader>
       <DialogContent>
@@ -53,23 +57,24 @@
           {{ eventError }}
         </div>
         <EventForm
+          :event="editingEvent"
           @submit="onEventSubmit"
-          @cancel="addEventOpen = false"
+          @cancel="eventDialogOpen = false"
         />
       </DialogContent>
     </Dialog>
 
-    <!-- Add Payment Dialog -->
+    <!-- Payment Dialog (Add/Edit) -->
     <Dialog
-      v-model:open="addPaymentOpen"
-      title-id="add-payment-title"
+      v-model:open="paymentDialogOpen"
+      title-id="payment-dialog-title"
     >
       <DialogHeader>
         <h2
-          id="add-payment-title"
+          id="payment-dialog-title"
           class="text-lg font-semibold"
         >
-          Dodaj plaćanje
+          {{ editingPayment ? 'Izmeni plaćanje' : 'Dodaj plaćanje' }}
         </h2>
       </DialogHeader>
       <DialogContent>
@@ -80,23 +85,24 @@
           {{ paymentError }}
         </div>
         <PaymentForm
+          :payment="editingPayment"
           @submit="onPaymentSubmit"
-          @cancel="addPaymentOpen = false"
+          @cancel="paymentDialogOpen = false"
         />
       </DialogContent>
     </Dialog>
 
-    <!-- Add Birthday Dialog -->
+    <!-- Birthday Dialog (Add/Edit) -->
     <Dialog
-      v-model:open="addBirthdayOpen"
-      title-id="add-birthday-title"
+      v-model:open="birthdayDialogOpen"
+      title-id="birthday-dialog-title"
     >
       <DialogHeader>
         <h2
-          id="add-birthday-title"
+          id="birthday-dialog-title"
           class="text-lg font-semibold"
         >
-          Dodaj rođendan
+          {{ editingBirthday ? 'Izmeni rođendan' : 'Dodaj rođendan' }}
         </h2>
       </DialogHeader>
       <DialogContent>
@@ -107,23 +113,24 @@
           {{ birthdayError }}
         </div>
         <BirthdayForm
+          :birthday="editingBirthday"
           @submit="onBirthdaySubmit"
-          @cancel="addBirthdayOpen = false"
+          @cancel="birthdayDialogOpen = false"
         />
       </DialogContent>
     </Dialog>
 
-    <!-- Add Expense Dialog -->
+    <!-- Expense Dialog (Add/Edit) -->
     <Dialog
-      v-model:open="addExpenseOpen"
-      title-id="add-expense-title"
+      v-model:open="expenseDialogOpen"
+      title-id="expense-dialog-title"
     >
       <DialogHeader>
         <h2
-          id="add-expense-title"
+          id="expense-dialog-title"
           class="text-lg font-semibold"
         >
-          Dodaj izdvajanje
+          {{ editingExpense ? 'Izmeni izdvajanje' : 'Dodaj izdvajanje' }}
         </h2>
       </DialogHeader>
       <DialogContent>
@@ -134,8 +141,9 @@
           {{ expenseError }}
         </div>
         <ExpenseForm
+          :expense="editingExpense"
           @submit="onExpenseSubmit"
-          @cancel="addExpenseOpen = false"
+          @cancel="expenseDialogOpen = false"
         />
       </DialogContent>
     </Dialog>
@@ -164,10 +172,10 @@ const { familyId, fetchProfile } = useProfile();
 const supabase = useSupabase();
 
 // Composables for CRUD operations
-const { createEvent } = useEvents();
-const { createPayment } = usePayments();
-const { createBirthday } = useBirthdays();
-const { createExpense } = useExpenses();
+const { createEvent, updateEvent } = useEvents();
+const { createPayment, updatePayment } = usePayments();
+const { createBirthday, updateBirthday } = useBirthdays();
+const { createExpense, updateExpense } = useExpenses();
 
 // Data
 const allEvents = ref<Event[]>([]);
@@ -176,10 +184,16 @@ const allBirthdays = ref<Birthday[]>([]);
 const allExpenses = ref<Expense[]>([]);
 
 // Dialog state
-const addEventOpen = ref(false);
-const addPaymentOpen = ref(false);
-const addBirthdayOpen = ref(false);
-const addExpenseOpen = ref(false);
+const eventDialogOpen = ref(false);
+const paymentDialogOpen = ref(false);
+const birthdayDialogOpen = ref(false);
+const expenseDialogOpen = ref(false);
+
+// Editing state
+const editingEvent = ref<Event | null>(null);
+const editingPayment = ref<Payment | null>(null);
+const editingBirthday = ref<Birthday | null>(null);
+const editingExpense = ref<Expense | null>(null);
 
 // Error state
 const eventError = ref('');
@@ -187,25 +201,54 @@ const paymentError = ref('');
 const birthdayError = ref('');
 const expenseError = ref('');
 
-// Open dialogs
+// Open Add dialogs
 function openAddEvent(): void {
   eventError.value = '';
-  addEventOpen.value = true;
+  editingEvent.value = null;
+  eventDialogOpen.value = true;
 }
 
 function openAddPayment(): void {
   paymentError.value = '';
-  addPaymentOpen.value = true;
+  editingPayment.value = null;
+  paymentDialogOpen.value = true;
 }
 
 function openAddBirthday(): void {
   birthdayError.value = '';
-  addBirthdayOpen.value = true;
+  editingBirthday.value = null;
+  birthdayDialogOpen.value = true;
 }
 
 function openAddExpense(): void {
   expenseError.value = '';
-  addExpenseOpen.value = true;
+  editingExpense.value = null;
+  expenseDialogOpen.value = true;
+}
+
+// Open Edit dialogs
+function openEditEvent(event: Event): void {
+  eventError.value = '';
+  editingEvent.value = event;
+  eventDialogOpen.value = true;
+}
+
+function openEditPayment(payment: Payment): void {
+  paymentError.value = '';
+  editingPayment.value = payment;
+  paymentDialogOpen.value = true;
+}
+
+function openEditBirthday(birthday: Birthday): void {
+  birthdayError.value = '';
+  editingBirthday.value = birthday;
+  birthdayDialogOpen.value = true;
+}
+
+function openEditExpense(expense: Expense): void {
+  expenseError.value = '';
+  editingExpense.value = expense;
+  expenseDialogOpen.value = true;
 }
 
 // Submit handlers
@@ -213,12 +256,20 @@ async function onEventSubmit(
   payload: Omit<Event, 'id' | 'family_id' | 'created_at' | 'updated_at'>,
 ): Promise<void> {
   eventError.value = '';
-  const { error } = await createEvent(payload);
-  if (error) {
-    eventError.value = error.message || 'Greška pri kreiranju događaja';
-    return;
+  if (editingEvent.value) {
+    const { error } = await updateEvent(editingEvent.value.id, payload);
+    if (error) {
+      eventError.value = error.message || 'Greška pri ažuriranju događaja';
+      return;
+    }
+  } else {
+    const { error } = await createEvent(payload);
+    if (error) {
+      eventError.value = error.message || 'Greška pri kreiranju događaja';
+      return;
+    }
   }
-  addEventOpen.value = false;
+  eventDialogOpen.value = false;
   await loadEvents();
 }
 
@@ -232,12 +283,20 @@ async function onPaymentSubmit(payload: {
   remaining_occurrences?: number | null;
 }): Promise<void> {
   paymentError.value = '';
-  const { error } = await createPayment(payload);
-  if (error) {
-    paymentError.value = error.message || 'Greška pri kreiranju plaćanja';
-    return;
+  if (editingPayment.value) {
+    const { error } = await updatePayment(editingPayment.value.id, payload);
+    if (error) {
+      paymentError.value = error.message || 'Greška pri ažuriranju plaćanja';
+      return;
+    }
+  } else {
+    const { error } = await createPayment(payload);
+    if (error) {
+      paymentError.value = error.message || 'Greška pri kreiranju plaćanja';
+      return;
+    }
   }
-  addPaymentOpen.value = false;
+  paymentDialogOpen.value = false;
   await loadPayments();
 }
 
@@ -247,12 +306,20 @@ async function onBirthdaySubmit(payload: {
   birth_date: string;
 }): Promise<void> {
   birthdayError.value = '';
-  const { error } = await createBirthday(payload);
-  if (error) {
-    birthdayError.value = error.message || 'Greška pri kreiranju rođendana';
-    return;
+  if (editingBirthday.value) {
+    const { error } = await updateBirthday(editingBirthday.value.id, payload);
+    if (error) {
+      birthdayError.value = error.message || 'Greška pri ažuriranju rođendana';
+      return;
+    }
+  } else {
+    const { error } = await createBirthday(payload);
+    if (error) {
+      birthdayError.value = error.message || 'Greška pri kreiranju rođendana';
+      return;
+    }
   }
-  addBirthdayOpen.value = false;
+  birthdayDialogOpen.value = false;
   await loadBirthdays();
 }
 
@@ -262,12 +329,20 @@ async function onExpenseSubmit(payload: {
   amount: number;
 }): Promise<void> {
   expenseError.value = '';
-  const { error } = await createExpense(payload);
-  if (error) {
-    expenseError.value = error.message || 'Greška pri kreiranju izdvajanja';
-    return;
+  if (editingExpense.value) {
+    const { error } = await updateExpense(editingExpense.value.id, payload);
+    if (error) {
+      expenseError.value = error.message || 'Greška pri ažuriranju izdvajanja';
+      return;
+    }
+  } else {
+    const { error } = await createExpense(payload);
+    if (error) {
+      expenseError.value = error.message || 'Greška pri kreiranju izdvajanja';
+      return;
+    }
   }
-  addExpenseOpen.value = false;
+  expenseDialogOpen.value = false;
   await loadExpenses();
 }
 
@@ -296,7 +371,11 @@ async function loadBirthdays(): Promise<void> {
 async function loadExpenses(): Promise<void> {
   const fid = familyId.value;
   if (!fid) return;
-  const { data } = await supabase.from('expenses').select('*').eq('family_id', fid);
+  const { data } = await supabase
+    .from('expenses')
+    .select('*')
+    .eq('family_id', fid)
+    .order('sort_order', { ascending: true });
   allExpenses.value = (data as Expense[]) ?? [];
 }
 

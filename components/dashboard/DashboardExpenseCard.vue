@@ -16,7 +16,7 @@
         class="space-y-2"
       >
         <button
-          v-for="e in unpaidExpenses.slice(0, 3)"
+          v-for="e in unpaidExpenses.slice(0, 5)"
           :key="e.id"
           type="button"
           class="flex w-full items-center justify-between rounded-md bg-purple-50 px-3 py-2 text-left text-sm transition-colors hover:bg-purple-100"
@@ -26,10 +26,10 @@
           <span class="text-purple-700">{{ formatAmount(e.amount) }}</span>
         </button>
         <p
-          v-if="unpaidExpenses.length > 3"
+          v-if="unpaidExpenses.length > 5"
           class="text-xs text-gray-500"
         >
-          + još {{ unpaidExpenses.length - 3 }}
+          + još {{ unpaidExpenses.length - 5 }}
         </p>
       </div>
       <p
@@ -116,9 +116,7 @@
       >
         Zatvori
       </Button>
-      <NuxtLink to="/expenses">
-        <Button @click="detailOpen = false">Izmeni</Button>
-      </NuxtLink>
+      <Button @click="handleEdit">Izmeni</Button>
     </DialogFooter>
   </Dialog>
 </template>
@@ -137,10 +135,17 @@ interface Props {
 
 const props = defineProps<Props>();
 
-defineEmits<{ add: [] }>();
+const emit = defineEmits<{ add: []; edit: [expense: Expense] }>();
 
 const detailOpen = ref(false);
 const selectedExpense = ref<Expense | null>(null);
+
+function handleEdit(): void {
+  if (selectedExpense.value) {
+    detailOpen.value = false;
+    emit('edit', selectedExpense.value);
+  }
+}
 
 // Filter unpaid expenses
 const unpaidExpenses = computed(() => {

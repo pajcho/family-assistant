@@ -51,122 +51,126 @@
       <li
         v-for="item in combinedList"
         :key="item.id"
-        class="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white p-4 shadow-sm"
+        class="rounded-lg border bg-white p-4 shadow-sm"
         :class="getItemClass(item)"
       >
-        <div class="min-w-0 flex-1">
-          <p class="font-medium text-gray-900">{{ item.name }}</p>
-          <p class="text-sm text-gray-600">
-            {{ formatDate(item.due_date) }} · {{ formatAmount(item.amount) }}
-          </p>
-          <p
-            v-if="'description' in item && item.description"
-            class="mt-1 text-sm text-gray-500"
-          >
-            {{ item.description }}
-          </p>
-          <div class="mt-1 flex flex-wrap gap-2 text-xs">
-            <!-- History entry -->
-            <template v-if="item.type === 'history'">
-              <span class="font-medium text-emerald-600">
-                Plaćeno {{ formatDate(item.paid_date) }}
-              </span>
-            </template>
-            <!-- Paused payment -->
-            <template v-else-if="item.is_paused">
-              <span class="font-medium text-gray-500">Pauzirano</span>
-            </template>
-            <!-- Active payment -->
-            <template v-else>
-              <span
-                v-if="item.is_paid"
-                class="text-gray-500"
-              >
-                Plaćeno {{ item.paid_date ? formatDate(item.paid_date) : '' }}
-              </span>
-              <span
-                v-else-if="item.recurrence_period === 'monthly'"
-                class="text-amber-600"
-              >
-                Mesečno
-              </span>
-              <span
-                v-else-if="item.recurrence_period === 'limited'"
-                class="text-amber-600"
-              >
-                Ostalo {{ item.remaining_occurrences ?? 0 }} uplata
-              </span>
-              <span
-                v-else
-                class="text-gray-500"
-              >
-                Jednokratno
-              </span>
-            </template>
+        <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
+          <div class="min-w-0 flex-1">
+            <p class="font-medium text-gray-900">{{ item.name }}</p>
+            <p class="text-sm text-gray-600">
+              {{ formatDate(item.due_date) }} · {{ formatAmount(item.amount) }}
+            </p>
+            <p
+              v-if="'description' in item && item.description"
+              class="mt-1 text-sm text-gray-500"
+            >
+              {{ item.description }}
+            </p>
+            <div class="mt-1 flex flex-wrap gap-2 text-xs">
+              <!-- History entry -->
+              <template v-if="item.type === 'history'">
+                <span class="font-medium text-emerald-600">
+                  Plaćeno {{ formatDate(item.paid_date) }}
+                </span>
+              </template>
+              <!-- Paused payment -->
+              <template v-else-if="item.is_paused">
+                <span class="font-medium text-gray-500">Pauzirano</span>
+              </template>
+              <!-- Active payment -->
+              <template v-else>
+                <span
+                  v-if="item.is_paid"
+                  class="text-gray-500"
+                >
+                  Plaćeno {{ item.paid_date ? formatDate(item.paid_date) : '' }}
+                </span>
+                <span
+                  v-else-if="item.recurrence_period === 'monthly'"
+                  class="text-amber-600"
+                >
+                  Mesečno
+                </span>
+                <span
+                  v-else-if="item.recurrence_period === 'limited'"
+                  class="text-amber-600"
+                >
+                  Ostalo {{ item.remaining_occurrences ?? 0 }} uplata
+                </span>
+                <span
+                  v-else
+                  class="text-gray-500"
+                >
+                  Jednokratno
+                </span>
+              </template>
+            </div>
           </div>
-        </div>
-        <!-- Undo button for history entries (only last one) -->
-        <div
-          v-if="item.type === 'history' && item.isLast"
-          class="flex shrink-0 items-center gap-2"
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            @click="confirmUndo(item)"
+          <!-- Undo button for history entries (only last one) -->
+          <div
+            v-if="item.type === 'history' && item.isLast"
+            class="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap"
           >
-            Poništi
-          </Button>
-        </div>
-        <div
-          v-if="item.type === 'payment'"
-          class="flex shrink-0 items-center gap-2"
-        >
-          <!-- Pause/Resume button for recurring -->
-          <template v-if="!item.is_paid && item.recurrence_period !== 'one-time'">
             <Button
-              v-if="item.is_paused"
               variant="outline"
               size="sm"
-              @click="handleTogglePause(item)"
+              @click="confirmUndo(item)"
             >
-              Nastavi
+              Poništi
+            </Button>
+          </div>
+          <div
+            v-if="item.type === 'payment'"
+            class="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap"
+          >
+            <!-- Pause/Resume button for recurring -->
+            <template v-if="!item.is_paid && item.recurrence_period !== 'one-time'">
+              <Button
+                v-if="item.is_paused"
+                variant="outline"
+                size="sm"
+                @click="handleTogglePause(item)"
+              >
+                Nastavi
+              </Button>
+              <Button
+                v-else
+                variant="secondary"
+                size="sm"
+                @click="handleTogglePause(item)"
+              >
+                Pauziraj
+              </Button>
+            </template>
+            <!-- Mark as paid -->
+            <template v-if="!item.is_paid && !item.is_paused">
+              <Button
+                variant="success"
+                size="sm"
+                @click="markPaid(item)"
+              >
+                Plaćeno
+              </Button>
+            </template>
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label="Izmeni"
+              @click="openEdit(item)"
+            >
+              <PencilIcon class="h-4 w-4 sm:mr-1" />
+              <span class="hidden sm:inline">Izmeni</span>
             </Button>
             <Button
-              v-else
-              variant="secondary"
+              variant="destructive"
               size="sm"
-              @click="handleTogglePause(item)"
+              aria-label="Obriši"
+              @click="confirmDelete(item)"
             >
-              Pauziraj
+              <TrashIcon class="h-4 w-4 sm:mr-1" />
+              <span class="hidden sm:inline">Obriši</span>
             </Button>
-          </template>
-          <!-- Mark as paid -->
-          <template v-if="!item.is_paid && !item.is_paused">
-            <Button
-              variant="success"
-              size="sm"
-              @click="markPaid(item)"
-            >
-              Plaćeno
-            </Button>
-          </template>
-          <Button
-            variant="outline"
-            size="sm"
-            aria-label="Izmeni"
-            @click="openEdit(item)"
-          >
-            <PencilIcon class="h-4 w-4" />
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            aria-label="Obriši"
-            @click="confirmDelete(item)"
-          >
-            <TrashIcon class="h-4 w-4" />
-          </Button>
+          </div>
         </div>
       </li>
     </ul>

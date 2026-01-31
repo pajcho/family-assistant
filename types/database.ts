@@ -74,6 +74,7 @@ export interface Expense {
   amount: number;
   is_paid: boolean;
   paid_date: string | null;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 }

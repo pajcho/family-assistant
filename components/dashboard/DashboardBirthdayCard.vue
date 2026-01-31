@@ -123,9 +123,7 @@
       >
         Zatvori
       </Button>
-      <NuxtLink :to="`/birthdays`">
-        <Button @click="detailOpen = false">Izmeni</Button>
-      </NuxtLink>
+      <Button @click="handleEdit">Izmeni</Button>
     </DialogFooter>
   </Dialog>
 </template>
@@ -150,10 +148,17 @@ interface Props {
 
 const props = defineProps<Props>();
 
-defineEmits<{ add: [] }>();
+const emit = defineEmits<{ add: []; edit: [birthday: Birthday] }>();
 
 const detailOpen = ref(false);
 const selectedBirthday = ref<Birthday | null>(null);
+
+function handleEdit(): void {
+  if (selectedBirthday.value) {
+    detailOpen.value = false;
+    emit('edit', selectedBirthday.value);
+  }
+}
 
 // Filter birthdays within 30 days and sort by days until
 const upcomingBirthdays = computed(() => {

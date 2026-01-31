@@ -137,9 +137,7 @@
       >
         Označi kao plaćeno
       </Button>
-      <NuxtLink to="/payments">
-        <Button @click="detailOpen = false">Izmeni</Button>
-      </NuxtLink>
+      <Button @click="handleEdit">Izmeni</Button>
     </DialogFooter>
   </Dialog>
 </template>
@@ -159,9 +157,16 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const emit = defineEmits<{ add: []; updated: [] }>();
+const emit = defineEmits<{ add: []; updated: []; edit: [payment: Payment] }>();
 
 const { markAsPaid } = usePayments();
+
+function handleEdit(): void {
+  if (selectedPayment.value) {
+    detailOpen.value = false;
+    emit('edit', selectedPayment.value);
+  }
+}
 
 const detailOpen = ref(false);
 const selectedPayment = ref<Payment | null>(null);

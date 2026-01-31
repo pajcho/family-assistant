@@ -65,44 +65,48 @@
       <li
         v-for="ev in events"
         :key="ev.id"
-        class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
       >
-        <div class="min-w-0 flex-1">
-          <p class="font-medium text-gray-900">{{ ev.name }}</p>
-          <p class="text-sm text-gray-600">
-            {{ formatDate(ev.date) }} · {{ formatTime(ev.start_time) }} –
-            {{ formatTime(ev.end_time) }}
-          </p>
-          <p
-            v-if="ev.description"
-            class="mt-1 text-sm text-gray-500"
-          >
-            {{ ev.description }}
-          </p>
-          <p
-            v-if="ev.notes"
-            class="mt-1 text-sm text-amber-700"
-          >
-            {{ ev.notes }}
-          </p>
-        </div>
-        <div class="flex shrink-0 gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            aria-label="Izmeni"
-            @click="openEdit(ev)"
-          >
-            <PencilIcon class="h-4 w-4" />
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            aria-label="Obriši"
-            @click="confirmDelete(ev)"
-          >
-            <TrashIcon class="h-4 w-4" />
-          </Button>
+        <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
+          <div class="min-w-0 flex-1">
+            <p class="font-medium text-gray-900">{{ ev.name }}</p>
+            <p class="text-sm text-gray-600">
+              {{ formatDate(ev.date) }} · {{ formatTime(ev.start_time) }} –
+              {{ formatTime(ev.end_time) }}
+            </p>
+            <p
+              v-if="ev.description"
+              class="mt-1 text-sm text-gray-500"
+            >
+              {{ ev.description }}
+            </p>
+            <p
+              v-if="ev.notes"
+              class="mt-1 text-sm text-amber-700"
+            >
+              {{ ev.notes }}
+            </p>
+          </div>
+          <div class="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap">
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label="Izmeni"
+              @click="openEdit(ev)"
+            >
+              <PencilIcon class="h-4 w-4 sm:mr-1" />
+              <span class="hidden sm:inline">Izmeni</span>
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              aria-label="Obriši"
+              @click="confirmDelete(ev)"
+            >
+              <TrashIcon class="h-4 w-4 sm:mr-1" />
+              <span class="hidden sm:inline">Obriši</span>
+            </Button>
+          </div>
         </div>
       </li>
     </ul>
