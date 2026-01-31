@@ -16,7 +16,7 @@
     </div>
     <div
       v-else-if="sortedBirthdays.length === 0"
-      class="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-center text-gray-500"
+      class="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-center text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
     >
       Nema unetih rođendana.
     </div>

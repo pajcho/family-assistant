@@ -15,6 +15,13 @@
   *::after {
     @apply transition-colors duration-200;
   }
+
+  /* Dark mode styling for native date/time picker icons */
+  .dark input[type='date']::-webkit-calendar-picker-indicator,
+  .dark input[type='time']::-webkit-calendar-picker-indicator,
+  .dark input[type='datetime-local']::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
 }
 
 @layer utilities {
