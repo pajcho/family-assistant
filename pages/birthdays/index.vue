@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-2xl font-semibold text-gray-900">Rođendani</h1>
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Rođendani</h1>
       <Button @click="openAdd">
         <PlusIcon class="mr-2 h-5 w-5" />
         Dodaj rođendan
@@ -27,36 +27,53 @@
       <li
         v-for="b in sortedBirthdays"
         :key="b.id"
-        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
       >
         <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
           <div class="min-w-0 flex-1">
-            <p class="font-medium text-gray-900">{{ birthdayDisplayText(b.name, b.birth_date) }}</p>
+            <p class="font-medium text-gray-900 dark:text-gray-100">
+              {{ birthdayDisplayText(b.name, b.birth_date) }}
+            </p>
             <p
               v-if="b.description"
-              class="mt-1 text-sm text-gray-500"
+              class="mt-1 text-sm text-gray-500 dark:text-gray-400"
             >
               {{ b.description }}
             </p>
           </div>
-          <div class="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap">
+          <!-- Mobile: Dropdown menu -->
+          <div class="flex shrink-0 sm:hidden">
+            <Dropdown>
+              <DropdownItem
+                label="Izmeni"
+                :icon="PencilIcon"
+                @click="openEdit(b)"
+              />
+              <DropdownItem
+                label="Obriši"
+                :icon="TrashIcon"
+                variant="destructive"
+                @click="confirmDelete(b)"
+              />
+            </Dropdown>
+          </div>
+          <!-- Desktop: Regular buttons -->
+          <div class="hidden shrink-0 gap-2 sm:flex">
             <Button
               variant="outline"
               size="sm"
-              aria-label="Izmeni"
               @click="openEdit(b)"
             >
-              <PencilIcon class="h-4 w-4 sm:mr-1" />
-              <span class="hidden sm:inline">Izmeni</span>
+              <PencilIcon class="mr-1 h-4 w-4" />
+              Izmeni
             </Button>
             <Button
               variant="destructive"
               size="sm"
-              aria-label="Obriši"
               @click="confirmDelete(b)"
             >
-              <TrashIcon class="h-4 w-4 sm:mr-1" />
-              <span class="hidden sm:inline">Obriši</span>
+              <TrashIcon class="mr-1 h-4 w-4" />
+              Obriši
             </Button>
           </div>
         </div>
@@ -131,6 +148,7 @@ import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import type { Birthday } from '~/types/database';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
+import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import BirthdayForm from '~/components/birthdays/BirthdayForm.vue';
 import { birthdayDisplayText, daysUntilBirthday } from '~/utils/birthday';
 import { useBirthdays } from '~/composables/useBirthdays';

@@ -18,6 +18,6 @@ const props = defineProps<Props>();
 const attrs = useAttrs();
 const forId = computed(() => props.for ?? undefined);
 const labelClass = computed(() =>
-  cn('text-sm leading-none font-medium text-gray-700', attrs.class as string),
+  cn('text-sm font-medium leading-none text-gray-700 dark:text-gray-200', attrs.class as string),
 );
 </script>

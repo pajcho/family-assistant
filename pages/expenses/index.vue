@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-2xl font-semibold text-gray-900">Planirana izdvajanja</h1>
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Planirana izdvajanja</h1>
       <div class="flex flex-wrap items-center gap-2">
         <label class="flex items-center gap-2 text-sm text-gray-600">
           <input
@@ -47,37 +47,60 @@
         v-for="e in expenses"
         :key="e.id"
         :data-id="e.id"
-        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
         :class="{ 'opacity-60': e.is_paid }"
       >
         <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
           <!-- Drag handle -->
           <div
-            class="drag-handle flex cursor-grab items-center py-2 text-gray-400 active:cursor-grabbing"
+            class="drag-handle flex cursor-grab items-center py-2 text-gray-400 active:cursor-grabbing dark:text-gray-500"
           >
             <Bars3Icon class="h-5 w-5" />
           </div>
 
           <!-- Content -->
           <div class="min-w-0 flex-1">
-            <p class="font-medium text-gray-900">{{ e.name }}</p>
-            <p class="text-sm text-gray-600">{{ formatAmount(e.amount) }}</p>
+            <p class="font-medium text-gray-900 dark:text-gray-100">{{ e.name }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ formatAmount(e.amount) }}</p>
             <p
               v-if="e.description"
-              class="mt-1 text-sm text-gray-500"
+              class="mt-1 text-sm text-gray-500 dark:text-gray-400"
             >
               {{ e.description }}
             </p>
             <p
               v-if="e.is_paid && e.paid_date"
-              class="mt-1 text-sm text-gray-500"
+              class="mt-1 text-sm text-gray-500 dark:text-gray-400"
             >
               Kupljeno {{ formatDate(e.paid_date) }}
             </p>
           </div>
 
-          <!-- Action buttons - below content on mobile, right side on desktop -->
-          <div class="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap">
+          <!-- Mobile: Dropdown menu -->
+          <div class="flex shrink-0 sm:hidden">
+            <Dropdown>
+              <DropdownItem
+                v-if="!e.is_paid"
+                label="Označi kao plaćeno"
+                :icon="CheckIcon"
+                @click="markPaid(e)"
+              />
+              <DropdownItem
+                label="Izmeni"
+                :icon="PencilIcon"
+                @click="openEdit(e)"
+              />
+              <DropdownItem
+                label="Obriši"
+                :icon="TrashIcon"
+                variant="destructive"
+                @click="confirmDelete(e)"
+              />
+            </Dropdown>
+          </div>
+
+          <!-- Desktop: Regular buttons -->
+          <div class="hidden shrink-0 gap-2 sm:flex">
             <template v-if="!e.is_paid">
               <Button
                 size="sm"
@@ -89,20 +112,18 @@
             <Button
               variant="outline"
               size="sm"
-              aria-label="Izmeni"
               @click="openEdit(e)"
             >
-              <PencilIcon class="h-4 w-4 sm:mr-1" />
-              <span class="hidden sm:inline">Izmeni</span>
+              <PencilIcon class="mr-1 h-4 w-4" />
+              Izmeni
             </Button>
             <Button
               variant="destructive"
               size="sm"
-              aria-label="Obriši"
               @click="confirmDelete(e)"
             >
-              <TrashIcon class="h-4 w-4 sm:mr-1" />
-              <span class="hidden sm:inline">Obriši</span>
+              <TrashIcon class="mr-1 h-4 w-4" />
+              Obriši
             </Button>
           </div>
         </div>
@@ -168,10 +189,11 @@
 
 <script setup lang="ts">
 import { Sortable } from 'sortablejs';
-import { PlusIcon, PencilIcon, TrashIcon, Bars3Icon } from '@heroicons/vue/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, Bars3Icon, CheckIcon } from '@heroicons/vue/24/outline';
 import type { Expense } from '~/types/database';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
+import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import ExpenseForm from '~/components/expenses/ExpenseForm.vue';
 import { formatDate, formatAmount } from '~/utils/format';
 import { useExpenses } from '~/composables/useExpenses';

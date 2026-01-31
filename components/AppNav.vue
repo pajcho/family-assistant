@@ -1,10 +1,12 @@
 <template>
-  <nav class="w-full border-b border-gray-200 bg-white">
+  <nav
+    class="sticky top-0 z-40 w-full border-b border-gray-200/80 bg-white/80 backdrop-blur-md dark:border-gray-700/80 dark:bg-gray-800/80"
+  >
     <div class="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
       <div class="flex items-center gap-6">
         <NuxtLink
           to="/"
-          class="text-lg font-semibold text-gray-900"
+          class="text-lg font-semibold text-gray-900 dark:text-white"
         >
           Porodični asistent
         </NuxtLink>
@@ -36,19 +38,22 @@
           />
         </div>
       </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        aria-label="Odjavi se"
-        @click="logout"
-      >
-        <ArrowRightOnRectangleIcon class="h-5 w-5" />
-        <span class="ml-2 hidden sm:inline">Odjavi se</span>
-      </Button>
+      <div class="flex items-center gap-2">
+        <ThemeToggle />
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label="Odjavi se"
+          @click="logout"
+        >
+          <ArrowRightOnRectangleIcon class="h-5 w-5" />
+          <span class="ml-2 hidden sm:inline">Odjavi se</span>
+        </Button>
+      </div>
     </div>
     <!-- Mobile bottom nav with horizontal scroll -->
     <div
-      class="scrollbar-hide flex w-full gap-1 overflow-x-auto border-t border-gray-200 px-4 py-2 sm:hidden"
+      class="scrollbar-hide flex w-full gap-1 overflow-x-auto border-t border-gray-200/80 px-4 py-2 dark:border-gray-700/80 sm:hidden"
     >
       <NavLink
         to="/"
@@ -95,6 +100,7 @@ import {
 } from '@heroicons/vue/24/outline';
 import { Button } from '~/components/ui/button';
 import NavLink from '~/components/AppNavLink.vue';
+import ThemeToggle from '~/components/ThemeToggle.vue';
 
 const { logout } = useAuth();
 </script>

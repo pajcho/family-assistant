@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-2xl font-semibold text-gray-900">Događaji</h1>
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Događaji</h1>
       <Button @click="openAdd">
         <PlusIcon class="mr-2 h-5 w-5" />
         Dodaj događaj
@@ -65,46 +65,61 @@
       <li
         v-for="ev in events"
         :key="ev.id"
-        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
       >
         <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
           <div class="min-w-0 flex-1">
-            <p class="font-medium text-gray-900">{{ ev.name }}</p>
-            <p class="text-sm text-gray-600">
+            <p class="font-medium text-gray-900 dark:text-gray-100">{{ ev.name }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
               {{ formatDate(ev.date) }} · {{ formatTime(ev.start_time) }} –
               {{ formatTime(ev.end_time) }}
             </p>
             <p
               v-if="ev.description"
-              class="mt-1 text-sm text-gray-500"
+              class="mt-1 text-sm text-gray-500 dark:text-gray-400"
             >
               {{ ev.description }}
             </p>
             <p
               v-if="ev.notes"
-              class="mt-1 text-sm text-amber-700"
+              class="mt-1 text-sm text-amber-700 dark:text-amber-400"
             >
               {{ ev.notes }}
             </p>
           </div>
-          <div class="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap">
+          <!-- Mobile: Dropdown menu -->
+          <div class="flex shrink-0 sm:hidden">
+            <Dropdown>
+              <DropdownItem
+                label="Izmeni"
+                :icon="PencilIcon"
+                @click="openEdit(ev)"
+              />
+              <DropdownItem
+                label="Obriši"
+                :icon="TrashIcon"
+                variant="destructive"
+                @click="confirmDelete(ev)"
+              />
+            </Dropdown>
+          </div>
+          <!-- Desktop: Regular buttons -->
+          <div class="hidden shrink-0 gap-2 sm:flex">
             <Button
               variant="outline"
               size="sm"
-              aria-label="Izmeni"
               @click="openEdit(ev)"
             >
-              <PencilIcon class="h-4 w-4 sm:mr-1" />
-              <span class="hidden sm:inline">Izmeni</span>
+              <PencilIcon class="mr-1 h-4 w-4" />
+              Izmeni
             </Button>
             <Button
               variant="destructive"
               size="sm"
-              aria-label="Obriši"
               @click="confirmDelete(ev)"
             >
-              <TrashIcon class="h-4 w-4 sm:mr-1" />
-              <span class="hidden sm:inline">Obriši</span>
+              <TrashIcon class="mr-1 h-4 w-4" />
+              Obriši
             </Button>
           </div>
         </div>
@@ -181,6 +196,7 @@ import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
+import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import EventForm from '~/components/events/EventForm.vue';
 import { formatDate, formatTime } from '~/utils/format';
 import { useEvents } from '~/composables/useEvents';

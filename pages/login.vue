@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+  <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-900">
     <Card class="w-full max-w-md">
       <CardHeader>
         <CardTitle>Prijava</CardTitle>
@@ -33,7 +33,7 @@
           </div>
           <p
             v-if="errorMessage"
-            class="text-sm text-red-600"
+            class="text-sm text-red-600 dark:text-red-400"
           >
             {{ errorMessage }}
           </p>

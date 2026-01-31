@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-2xl font-semibold text-gray-900">Plaćanja</h1>
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Plaćanja</h1>
       <div class="flex flex-wrap items-center gap-2">
         <label class="flex items-center gap-2 text-sm text-gray-600">
           <input
@@ -47,130 +47,169 @@
       v-else
       class="mt-6 space-y-3"
     >
-      <!-- History entries (paid) -->
+      <!-- Payment/History items -->
       <li
         v-for="item in combinedList"
         :key="item.id"
-        class="rounded-lg border bg-white p-4 shadow-sm"
+        class="rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-800"
         :class="getItemClass(item)"
       >
         <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
           <div class="min-w-0 flex-1">
-            <p class="font-medium text-gray-900">{{ item.name }}</p>
-            <p class="text-sm text-gray-600">
+            <p class="font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
               {{ formatDate(item.due_date) }} · {{ formatAmount(item.amount) }}
             </p>
             <p
               v-if="'description' in item && item.description"
-              class="mt-1 text-sm text-gray-500"
+              class="mt-1 text-sm text-gray-500 dark:text-gray-400"
             >
               {{ item.description }}
             </p>
             <div class="mt-1 flex flex-wrap gap-2 text-xs">
               <!-- History entry -->
               <template v-if="item.type === 'history'">
-                <span class="font-medium text-emerald-600">
+                <span class="font-medium text-emerald-600 dark:text-emerald-400">
                   Plaćeno {{ formatDate(item.paid_date) }}
                 </span>
               </template>
               <!-- Paused payment -->
               <template v-else-if="item.is_paused">
-                <span class="font-medium text-gray-500">Pauzirano</span>
+                <span class="font-medium text-gray-500 dark:text-gray-400">Pauzirano</span>
               </template>
               <!-- Active payment -->
               <template v-else>
                 <span
                   v-if="item.is_paid"
-                  class="text-gray-500"
+                  class="text-gray-500 dark:text-gray-400"
                 >
                   Plaćeno {{ item.paid_date ? formatDate(item.paid_date) : '' }}
                 </span>
                 <span
                   v-else-if="item.recurrence_period === 'monthly'"
-                  class="text-amber-600"
+                  class="text-amber-600 dark:text-amber-400"
                 >
                   Mesečno
                 </span>
                 <span
                   v-else-if="item.recurrence_period === 'limited'"
-                  class="text-amber-600"
+                  class="text-amber-600 dark:text-amber-400"
                 >
                   Ostalo {{ item.remaining_occurrences ?? 0 }} uplata
                 </span>
                 <span
                   v-else
-                  class="text-gray-500"
+                  class="text-gray-500 dark:text-gray-400"
                 >
                   Jednokratno
                 </span>
               </template>
             </div>
           </div>
-          <!-- Undo button for history entries (only last one) -->
-          <div
-            v-if="item.type === 'history' && item.isLast"
-            class="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap"
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              @click="confirmUndo(item)"
-            >
-              Poništi
-            </Button>
-          </div>
-          <div
-            v-if="item.type === 'payment'"
-            class="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap"
-          >
-            <!-- Pause/Resume button for recurring -->
-            <template v-if="!item.is_paid && item.recurrence_period !== 'one-time'">
+          <!-- History: Undo button -->
+          <template v-if="item.type === 'history' && item.isLast">
+            <div class="flex shrink-0 sm:hidden">
+              <Dropdown>
+                <DropdownItem
+                  label="Poništi"
+                  :icon="ArrowUturnLeftIcon"
+                  @click="confirmUndo(item)"
+                />
+              </Dropdown>
+            </div>
+            <div class="hidden shrink-0 sm:flex">
               <Button
-                v-if="item.is_paused"
                 variant="outline"
                 size="sm"
-                @click="handleTogglePause(item)"
+                @click="confirmUndo(item)"
               >
-                Nastavi
+                Poništi
+              </Button>
+            </div>
+          </template>
+          <!-- Payment: Actions -->
+          <template v-if="item.type === 'payment'">
+            <!-- Mobile: Dropdown -->
+            <div class="flex shrink-0 sm:hidden">
+              <Dropdown>
+                <DropdownItem
+                  v-if="!item.is_paid && !item.is_paused"
+                  label="Označi kao plaćeno"
+                  :icon="CheckIcon"
+                  @click="markPaid(item)"
+                />
+                <DropdownItem
+                  v-if="!item.is_paid && item.recurrence_period !== 'one-time' && item.is_paused"
+                  label="Nastavi"
+                  :icon="PlayIcon"
+                  @click="handleTogglePause(item)"
+                />
+                <DropdownItem
+                  v-if="!item.is_paid && item.recurrence_period !== 'one-time' && !item.is_paused"
+                  label="Pauziraj"
+                  :icon="PauseIcon"
+                  @click="handleTogglePause(item)"
+                />
+                <DropdownItem
+                  label="Izmeni"
+                  :icon="PencilIcon"
+                  @click="openEdit(item)"
+                />
+                <DropdownItem
+                  label="Obriši"
+                  :icon="TrashIcon"
+                  variant="destructive"
+                  @click="confirmDelete(item)"
+                />
+              </Dropdown>
+            </div>
+            <!-- Desktop: Buttons -->
+            <div class="hidden shrink-0 gap-2 sm:flex">
+              <template v-if="!item.is_paid && item.recurrence_period !== 'one-time'">
+                <Button
+                  v-if="item.is_paused"
+                  variant="outline"
+                  size="sm"
+                  @click="handleTogglePause(item)"
+                >
+                  Nastavi
+                </Button>
+                <Button
+                  v-else
+                  variant="secondary"
+                  size="sm"
+                  @click="handleTogglePause(item)"
+                >
+                  Pauziraj
+                </Button>
+              </template>
+              <template v-if="!item.is_paid && !item.is_paused">
+                <Button
+                  variant="success"
+                  size="sm"
+                  @click="markPaid(item)"
+                >
+                  Plaćeno
+                </Button>
+              </template>
+              <Button
+                variant="outline"
+                size="sm"
+                @click="openEdit(item)"
+              >
+                <PencilIcon class="mr-1 h-4 w-4" />
+                Izmeni
               </Button>
               <Button
-                v-else
-                variant="secondary"
+                variant="destructive"
                 size="sm"
-                @click="handleTogglePause(item)"
+                @click="confirmDelete(item)"
               >
-                Pauziraj
+                <TrashIcon class="mr-1 h-4 w-4" />
+                Obriši
               </Button>
-            </template>
-            <!-- Mark as paid -->
-            <template v-if="!item.is_paid && !item.is_paused">
-              <Button
-                variant="success"
-                size="sm"
-                @click="markPaid(item)"
-              >
-                Plaćeno
-              </Button>
-            </template>
-            <Button
-              variant="outline"
-              size="sm"
-              aria-label="Izmeni"
-              @click="openEdit(item)"
-            >
-              <PencilIcon class="h-4 w-4 sm:mr-1" />
-              <span class="hidden sm:inline">Izmeni</span>
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              aria-label="Obriši"
-              @click="confirmDelete(item)"
-            >
-              <TrashIcon class="h-4 w-4 sm:mr-1" />
-              <span class="hidden sm:inline">Obriši</span>
-            </Button>
-          </div>
+            </div>
+          </template>
         </div>
       </li>
     </ul>
@@ -273,10 +312,19 @@
 </template>
 
 <script setup lang="ts">
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import {
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  CheckIcon,
+  PlayIcon,
+  PauseIcon,
+  ArrowUturnLeftIcon,
+} from '@heroicons/vue/24/outline';
 import type { Payment, PaymentHistory, RecurrencePeriod } from '~/types/database';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
+import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import PaymentForm from '~/components/payments/PaymentForm.vue';
 import { formatDate, formatAmount } from '~/utils/format';
 import { usePayments } from '~/composables/usePayments';
@@ -424,15 +472,15 @@ const combinedList = computed<ListItem[]>(() => {
 
 function getItemClass(item: ListItem): string {
   if (item.type === 'history') {
-    return 'border-l-4 border-l-emerald-500 border-gray-200 opacity-75';
+    return 'border-l-4 border-l-emerald-500 border-gray-200 dark:border-gray-700 opacity-75';
   }
   if (item.is_paused) {
-    return 'border-gray-200 bg-gray-50 opacity-60';
+    return 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 opacity-60';
   }
   if (item.is_paid) {
-    return 'border-gray-200 opacity-60';
+    return 'border-gray-200 dark:border-gray-700 opacity-60';
   }
-  return 'border-gray-200';
+  return 'border-gray-200 dark:border-gray-700';
 }
 
 async function loadData(): Promise<void> {

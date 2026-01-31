@@ -1,17 +1,19 @@
 <template>
   <div>
-    <h1 class="text-2xl font-semibold text-gray-900">Kontrolna tabla</h1>
-    <p class="mt-1 text-gray-600">Dobrodošli nazad! Pregled nadolazećih obaveza.</p>
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Kontrolna tabla</h1>
+    <p class="mt-1 text-gray-600 dark:text-gray-400">
+      Dobrodošli nazad! Pregled nadolazećih obaveza.
+    </p>
 
     <div
       v-if="!familyId"
-      class="mt-6 text-gray-500"
+      class="mt-6 text-gray-500 dark:text-gray-400"
     >
       Učitavanje…
     </div>
     <div
       v-else
-      class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      class="stagger-fade-in mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
     >
       <DashboardEventCard
         :events="allEvents"

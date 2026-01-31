@@ -4,9 +4,15 @@
       <div class="flex items-center gap-2">
         <CalendarIcon
           class="h-5 w-5 shrink-0"
-          :class="upcomingEvents.length > 0 ? 'text-blue-600' : 'text-gray-400'"
+          :class="
+            upcomingEvents.length > 0
+              ? 'text-blue-600 dark:text-blue-400'
+              : 'text-gray-400 dark:text-gray-500'
+          "
         />
-        <CardTitle class="text-sm font-medium text-gray-600">Događaji (14 dana)</CardTitle>
+        <CardTitle class="text-sm font-medium text-gray-600 dark:text-gray-300">
+          Događaji (14 dana)
+        </CardTitle>
       </div>
     </CardHeader>
     <CardContent class="flex flex-1 flex-col">
@@ -19,22 +25,22 @@
           v-for="e in upcomingEvents.slice(0, 3)"
           :key="e.id"
           type="button"
-          class="flex w-full items-center justify-between rounded-md bg-blue-50 px-3 py-2 text-left text-sm transition-colors hover:bg-blue-100"
+          class="flex w-full items-center justify-between rounded-md bg-blue-50 px-3 py-2 text-left text-sm transition-colors hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50"
           @click="openDetail(e)"
         >
-          <span class="font-medium text-gray-900">{{ e.name }}</span>
-          <span class="text-blue-700">{{ eventDateLabel(e.date) }}</span>
+          <span class="font-medium text-gray-900 dark:text-gray-100">{{ e.name }}</span>
+          <span class="text-blue-700 dark:text-blue-400">{{ eventDateLabel(e.date) }}</span>
         </button>
         <p
           v-if="upcomingEvents.length > 3"
-          class="text-xs text-gray-500"
+          class="text-xs text-gray-500 dark:text-gray-400"
         >
           + još {{ upcomingEvents.length - 3 }}
         </p>
       </div>
       <p
         v-else
-        class="text-sm text-gray-500"
+        class="text-sm text-gray-500 dark:text-gray-400"
       >
         Nema nadolazećih događaja
       </p>
@@ -74,20 +80,26 @@
     <DialogContent v-if="selectedEvent">
       <div class="space-y-4">
         <div class="flex items-center gap-3">
-          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-            <CalendarIcon class="h-6 w-6 text-blue-600" />
+          <div
+            class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50"
+          >
+            <CalendarIcon class="h-6 w-6 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <p class="text-lg font-semibold text-gray-900">{{ selectedEvent.name }}</p>
-            <p class="text-sm text-gray-600">{{ formatDate(selectedEvent.date) }}</p>
+            <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {{ selectedEvent.name }}
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              {{ formatDate(selectedEvent.date) }}
+            </p>
           </div>
         </div>
 
-        <div class="rounded-lg bg-gray-50 p-4">
+        <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
           <dl class="space-y-2 text-sm">
             <div class="flex justify-between">
-              <dt class="text-gray-500">Vreme:</dt>
-              <dd class="font-medium text-gray-900">
+              <dt class="text-gray-500 dark:text-gray-400">Vreme:</dt>
+              <dd class="font-medium text-gray-900 dark:text-gray-100">
                 {{ formatTime(selectedEvent.start_time) }} –
                 {{ formatTime(selectedEvent.end_time) }}
               </dd>
@@ -96,15 +108,19 @@
               v-if="selectedEvent.description"
               class="flex justify-between"
             >
-              <dt class="text-gray-500">Opis:</dt>
-              <dd class="font-medium text-gray-900">{{ selectedEvent.description }}</dd>
+              <dt class="text-gray-500 dark:text-gray-400">Opis:</dt>
+              <dd class="font-medium text-gray-900 dark:text-gray-100">
+                {{ selectedEvent.description }}
+              </dd>
             </div>
             <div
               v-if="selectedEvent.notes"
               class="flex justify-between"
             >
-              <dt class="text-gray-500">Napomene:</dt>
-              <dd class="font-medium text-amber-700">{{ selectedEvent.notes }}</dd>
+              <dt class="text-gray-500 dark:text-gray-400">Napomene:</dt>
+              <dd class="font-medium text-amber-700 dark:text-amber-400">
+                {{ selectedEvent.notes }}
+              </dd>
             </div>
           </dl>
         </div>

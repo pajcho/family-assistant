@@ -4,9 +4,15 @@
       <div class="flex items-center gap-2">
         <CakeIcon
           class="h-5 w-5 shrink-0"
-          :class="upcomingBirthdays.length > 0 ? 'text-emerald-600' : 'text-gray-400'"
+          :class="
+            upcomingBirthdays.length > 0
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : 'text-gray-400 dark:text-gray-500'
+          "
         />
-        <CardTitle class="text-sm font-medium text-gray-600">Rođendani (30 dana)</CardTitle>
+        <CardTitle class="text-sm font-medium text-gray-600 dark:text-gray-300">
+          Rođendani (30 dana)
+        </CardTitle>
       </div>
     </CardHeader>
     <CardContent class="flex flex-1 flex-col">
@@ -19,22 +25,22 @@
           v-for="b in upcomingBirthdays.slice(0, 3)"
           :key="b.id"
           type="button"
-          class="flex w-full items-center justify-between rounded-md bg-emerald-50 px-3 py-2 text-left text-sm transition-colors hover:bg-emerald-100"
+          class="flex w-full items-center justify-between rounded-md bg-emerald-50 px-3 py-2 text-left text-sm transition-colors hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50"
           @click="openDetail(b)"
         >
-          <span class="font-medium text-gray-900">{{ b.name }}</span>
-          <span class="text-emerald-700">{{ daysLabel(b.birth_date) }}</span>
+          <span class="font-medium text-gray-900 dark:text-gray-100">{{ b.name }}</span>
+          <span class="text-emerald-700 dark:text-emerald-400">{{ daysLabel(b.birth_date) }}</span>
         </button>
         <p
           v-if="upcomingBirthdays.length > 3"
-          class="text-xs text-gray-500"
+          class="text-xs text-gray-500 dark:text-gray-400"
         >
           + još {{ upcomingBirthdays.length - 3 }}
         </p>
       </div>
       <p
         v-else
-        class="mt-1 text-xs text-gray-500"
+        class="mt-1 text-xs text-gray-500 dark:text-gray-400"
       >
         Nema rođendana u narednih 30 dana
       </p>
@@ -74,34 +80,38 @@
     <DialogContent v-if="selectedBirthday">
       <div class="space-y-4">
         <div class="flex items-center gap-3">
-          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
-            <CakeIcon class="h-6 w-6 text-emerald-600" />
+          <div
+            class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50"
+          >
+            <CakeIcon class="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div>
-            <p class="text-lg font-semibold text-gray-900">{{ selectedBirthday.name }}</p>
-            <p class="text-sm text-gray-600">
+            <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {{ selectedBirthday.name }}
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
               {{ birthdayDisplayText(selectedBirthday.name, selectedBirthday.birth_date) }}
             </p>
           </div>
         </div>
 
-        <div class="rounded-lg bg-gray-50 p-4">
+        <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
           <dl class="space-y-2 text-sm">
             <div class="flex justify-between">
-              <dt class="text-gray-500">Datum rođenja:</dt>
-              <dd class="font-medium text-gray-900">
+              <dt class="text-gray-500 dark:text-gray-400">Datum rođenja:</dt>
+              <dd class="font-medium text-gray-900 dark:text-gray-100">
                 {{ formatDate(selectedBirthday.birth_date) }}
               </dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-gray-500">Trenutne godine:</dt>
-              <dd class="font-medium text-gray-900">
+              <dt class="text-gray-500 dark:text-gray-400">Trenutne godine:</dt>
+              <dd class="font-medium text-gray-900 dark:text-gray-100">
                 {{ currentAge(selectedBirthday.birth_date) }}
               </dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-gray-500">Sledeći rođendan:</dt>
-              <dd class="font-medium text-gray-900">
+              <dt class="text-gray-500 dark:text-gray-400">Sledeći rođendan:</dt>
+              <dd class="font-medium text-gray-900 dark:text-gray-100">
                 {{ formatDate(nextBirthdayDateStr(selectedBirthday.birth_date)) }}
               </dd>
             </div>
@@ -109,8 +119,10 @@
               v-if="selectedBirthday.description"
               class="flex justify-between"
             >
-              <dt class="text-gray-500">Opis:</dt>
-              <dd class="font-medium text-gray-900">{{ selectedBirthday.description }}</dd>
+              <dt class="text-gray-500 dark:text-gray-400">Opis:</dt>
+              <dd class="font-medium text-gray-900 dark:text-gray-100">
+                {{ selectedBirthday.description }}
+              </dd>
             </div>
           </dl>
         </div>

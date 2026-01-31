@@ -4,9 +4,15 @@
       <div class="flex items-center gap-2">
         <BanknotesIcon
           class="h-5 w-5 shrink-0"
-          :class="upcomingPayments.length > 0 ? 'text-amber-600' : 'text-gray-400'"
+          :class="
+            upcomingPayments.length > 0
+              ? 'text-amber-600 dark:text-amber-400'
+              : 'text-gray-400 dark:text-gray-500'
+          "
         />
-        <CardTitle class="text-sm font-medium text-gray-600">Plaćanja (7 dana)</CardTitle>
+        <CardTitle class="text-sm font-medium text-gray-600 dark:text-gray-300">
+          Plaćanja (7 dana)
+        </CardTitle>
       </div>
     </CardHeader>
     <CardContent class="flex flex-1 flex-col">
@@ -19,22 +25,22 @@
           v-for="p in upcomingPayments.slice(0, 3)"
           :key="p.id"
           type="button"
-          class="flex w-full items-center justify-between rounded-md bg-amber-50 px-3 py-2 text-left text-sm transition-colors hover:bg-amber-100"
+          class="flex w-full items-center justify-between rounded-md bg-amber-50 px-3 py-2 text-left text-sm transition-colors hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50"
           @click="openDetail(p)"
         >
-          <span class="font-medium text-gray-900">{{ p.name }}</span>
-          <span class="text-amber-700">{{ formatAmount(p.amount) }}</span>
+          <span class="font-medium text-gray-900 dark:text-gray-100">{{ p.name }}</span>
+          <span class="text-amber-700 dark:text-amber-400">{{ formatAmount(p.amount) }}</span>
         </button>
         <p
           v-if="upcomingPayments.length > 3"
-          class="text-xs text-gray-500"
+          class="text-xs text-gray-500 dark:text-gray-400"
         >
           + još {{ upcomingPayments.length - 3 }}
         </p>
       </div>
       <p
         v-else
-        class="text-sm text-gray-500"
+        class="text-sm text-gray-500 dark:text-gray-400"
       >
         Nema plaćanja ove nedelje
       </p>
@@ -74,28 +80,44 @@
     <DialogContent v-if="selectedPayment">
       <div class="space-y-4">
         <div class="flex items-center gap-3">
-          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
-            <BanknotesIcon class="h-6 w-6 text-amber-600" />
+          <div
+            class="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/50"
+          >
+            <BanknotesIcon class="h-6 w-6 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
-            <p class="text-lg font-semibold text-gray-900">{{ selectedPayment.name }}</p>
-            <p class="text-sm text-gray-600">{{ recurrenceLabel(selectedPayment) }}</p>
+            <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {{ selectedPayment.name }}
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              {{ recurrenceLabel(selectedPayment) }}
+            </p>
           </div>
         </div>
 
-        <div class="rounded-lg bg-gray-50 p-4">
+        <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
           <dl class="space-y-2 text-sm">
             <div class="flex justify-between">
-              <dt class="text-gray-500">Iznos:</dt>
-              <dd class="font-medium text-gray-900">{{ formatAmount(selectedPayment.amount) }}</dd>
+              <dt class="text-gray-500 dark:text-gray-400">Iznos:</dt>
+              <dd class="font-medium text-gray-900 dark:text-gray-100">
+                {{ formatAmount(selectedPayment.amount) }}
+              </dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-gray-500">Datum dospeća:</dt>
-              <dd class="font-medium text-gray-900">{{ formatDate(selectedPayment.due_date) }}</dd>
+              <dt class="text-gray-500 dark:text-gray-400">Datum dospeća:</dt>
+              <dd class="font-medium text-gray-900 dark:text-gray-100">
+                {{ formatDate(selectedPayment.due_date) }}
+              </dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-gray-500">Status:</dt>
-              <dd :class="selectedPayment.is_paid ? 'text-emerald-700' : 'text-amber-700'">
+              <dt class="text-gray-500 dark:text-gray-400">Status:</dt>
+              <dd
+                :class="
+                  selectedPayment.is_paid
+                    ? 'text-emerald-700 dark:text-emerald-400'
+                    : 'text-amber-700 dark:text-amber-400'
+                "
+              >
                 {{ selectedPayment.is_paid ? 'Plaćeno' : 'Nije plaćeno' }}
               </dd>
             </div>
@@ -103,8 +125,10 @@
               v-if="selectedPayment.description"
               class="flex justify-between"
             >
-              <dt class="text-gray-500">Opis:</dt>
-              <dd class="font-medium text-gray-900">{{ selectedPayment.description }}</dd>
+              <dt class="text-gray-500 dark:text-gray-400">Opis:</dt>
+              <dd class="font-medium text-gray-900 dark:text-gray-100">
+                {{ selectedPayment.description }}
+              </dd>
             </div>
             <div
               v-if="
@@ -113,8 +137,8 @@
               "
               class="flex justify-between"
             >
-              <dt class="text-gray-500">Preostalo:</dt>
-              <dd class="font-medium text-gray-900">
+              <dt class="text-gray-500 dark:text-gray-400">Preostalo:</dt>
+              <dd class="font-medium text-gray-900 dark:text-gray-100">
                 {{ selectedPayment.remaining_occurrences }} rata
               </dd>
             </div>

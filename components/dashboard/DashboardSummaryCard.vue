@@ -7,7 +7,9 @@
           class="h-5 w-5 shrink-0"
           :class="iconClass"
         />
-        <CardTitle class="text-sm font-medium text-gray-600">{{ title }}</CardTitle>
+        <CardTitle class="text-sm font-medium text-gray-600 dark:text-gray-300">
+          {{ title }}
+        </CardTitle>
       </div>
     </CardHeader>
     <CardContent>
@@ -19,7 +21,7 @@
       </div>
       <p
         v-if="subtitle"
-        class="mt-1 text-xs text-gray-500"
+        class="mt-1 text-xs text-gray-500 dark:text-gray-400"
       >
         {{ subtitle }}
       </p>
@@ -68,20 +70,20 @@ defineEmits<{ action: [] }>();
 
 const iconClass = computed(() => {
   const map = {
-    default: 'text-gray-500',
-    success: 'text-emerald-600',
-    warning: 'text-amber-600',
-    muted: 'text-gray-400',
+    default: 'text-gray-500 dark:text-gray-400',
+    success: 'text-emerald-600 dark:text-emerald-400',
+    warning: 'text-amber-600 dark:text-amber-400',
+    muted: 'text-gray-400 dark:text-gray-500',
   };
   return map[props.variant];
 });
 
 const valueClass = computed(() => {
   const map = {
-    default: 'text-gray-900',
-    success: 'text-emerald-700',
-    warning: 'text-amber-700',
-    muted: 'text-gray-500',
+    default: 'text-gray-900 dark:text-gray-100',
+    success: 'text-emerald-700 dark:text-emerald-400',
+    warning: 'text-amber-700 dark:text-amber-400',
+    muted: 'text-gray-500 dark:text-gray-400',
   };
   return map[props.variant];
 });
