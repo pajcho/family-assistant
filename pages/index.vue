@@ -33,15 +33,9 @@
         to="/payments"
         @action="navigateTo('/payments')"
       />
-      <DashboardSummaryCard
-        title="Rođendani (30 dana)"
-        :display-value="birthdaysCount"
-        :subtitle="birthdaysSubtitle"
-        :icon="CakeIcon"
-        :variant="birthdaysCount > 0 ? 'success' : 'muted'"
-        to="/birthdays"
-        action-label="Dodaj rođendan"
-        @action="navigateTo('/birthdays')"
+      <DashboardBirthdayCard
+        :birthdays="allBirthdays"
+        @add="openAddBirthday"
       />
       <DashboardSummaryCard
         title="Neplaćena izdvajanja"
@@ -54,28 +48,64 @@
         @action="navigateTo('/expenses')"
       />
     </div>
+
+    <!-- Add Birthday Dialog -->
+    <Dialog
+      v-model:open="addBirthdayOpen"
+      title-id="add-birthday-title"
+    >
+      <DialogHeader>
+        <h2
+          id="add-birthday-title"
+          class="text-lg font-semibold"
+        >
+          Dodaj rođendan
+        </h2>
+      </DialogHeader>
+      <DialogContent>
+        <div
+          v-if="birthdayError"
+          class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
+        >
+          {{ birthdayError }}
+        </div>
+        <BirthdayForm
+          @submit="onBirthdaySubmit"
+          @cancel="addBirthdayOpen = false"
+        />
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { CalendarIcon, BanknotesIcon, CakeIcon, ShoppingBagIcon } from '@heroicons/vue/24/outline';
+import { CalendarIcon, BanknotesIcon, ShoppingBagIcon } from '@heroicons/vue/24/outline';
+import type { Birthday } from '~/types/database';
 import DashboardSummaryCard from '~/components/dashboard/DashboardSummaryCard.vue';
+import DashboardBirthdayCard from '~/components/dashboard/DashboardBirthdayCard.vue';
+import BirthdayForm from '~/components/birthdays/BirthdayForm.vue';
+import { Dialog, DialogHeader, DialogContent } from '~/components/ui/dialog';
 import { formatAmount } from '~/utils/format';
+import { useBirthdays } from '~/composables/useBirthdays';
 
 definePageMeta({ layout: 'default' });
 
 const router = useRouter();
 const { familyId, fetchProfile } = useProfile();
 const supabase = useSupabase();
+const { createBirthday } = useBirthdays();
 
 const eventsCount = ref(0);
 const paymentsCount = ref(0);
-const birthdaysCount = ref(0);
 const expensesCount = ref(0);
 const eventsSubtitle = ref('');
 const paymentsSubtitle = ref('');
-const birthdaysSubtitle = ref('');
 const expensesSubtitle = ref('');
+
+// Birthday state
+const allBirthdays = ref<Birthday[]>([]);
+const addBirthdayOpen = ref(false);
+const birthdayError = ref('');
 
 function navigateTo(path: string): void {
   router.push(path);
@@ -83,6 +113,33 @@ function navigateTo(path: string): void {
 
 function dateToISO(d: Date): string {
   return d.toISOString().slice(0, 10);
+}
+
+function openAddBirthday(): void {
+  birthdayError.value = '';
+  addBirthdayOpen.value = true;
+}
+
+async function onBirthdaySubmit(payload: {
+  name: string;
+  description?: string;
+  birth_date: string;
+}): Promise<void> {
+  birthdayError.value = '';
+  const { error } = await createBirthday(payload);
+  if (error) {
+    birthdayError.value = error.message || 'Greška pri kreiranju rođendana';
+    return;
+  }
+  addBirthdayOpen.value = false;
+  await loadBirthdays();
+}
+
+async function loadBirthdays(): Promise<void> {
+  const fid = familyId.value;
+  if (!fid) return;
+  const { data } = await supabase.from('birthdays').select('*').eq('family_id', fid);
+  allBirthdays.value = (data as Birthday[]) ?? [];
 }
 
 onMounted(async () => {
@@ -118,22 +175,8 @@ onMounted(async () => {
   paymentsSubtitle.value =
     paymentsCount.value === 0 ? 'Nema plaćanja ove nedelje' : 'dospeva uskoro';
 
-  const { data: birthdays } = await supabase
-    .from('birthdays')
-    .select('id, birth_date')
-    .eq('family_id', fid);
-  const in30 = new Date(today);
-  in30.setDate(in30.getDate() + 30);
-  const next30 =
-    birthdays?.filter((b) => {
-      const bd = new Date(b.birth_date);
-      const thisYear = new Date(today.getFullYear(), bd.getMonth(), bd.getDate());
-      const nextYear = new Date(today.getFullYear() + 1, bd.getMonth(), bd.getDate());
-      return (thisYear >= today && thisYear <= in30) || (nextYear >= today && nextYear <= in30);
-    }).length ?? 0;
-  birthdaysCount.value = next30;
-  birthdaysSubtitle.value =
-    birthdaysCount.value === 0 ? 'Nema rođendana u narednih 30 dana' : 'u narednih 30 dana';
+  // Load all birthdays for the new card
+  await loadBirthdays();
 
   const { count: expenses, data: expensesData } = await supabase
     .from('expenses')

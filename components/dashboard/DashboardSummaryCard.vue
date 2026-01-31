@@ -1,12 +1,14 @@
 <template>
   <Card>
-    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle class="text-sm font-medium text-gray-600">{{ title }}</CardTitle>
-      <component
-        :is="icon"
-        class="h-5 w-5 shrink-0"
-        :class="iconClass"
-      />
+    <CardHeader class="pb-2">
+      <div class="flex items-center gap-2">
+        <component
+          :is="icon"
+          class="h-5 w-5 shrink-0"
+          :class="iconClass"
+        />
+        <CardTitle class="text-sm font-medium text-gray-600">{{ title }}</CardTitle>
+      </div>
     </CardHeader>
     <CardContent>
       <div
