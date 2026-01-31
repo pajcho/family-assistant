@@ -109,28 +109,52 @@
         </div>
       </div>
     </DialogContent>
-    <DialogFooter>
+    <DialogFooter class="flex flex-wrap items-center gap-2">
       <Button
         variant="outline"
         @click="detailOpen = false"
       >
         Zatvori
       </Button>
-      <Button
-        variant="outline"
-        @click="openHistory"
-      >
-        Istorija
-      </Button>
-      <Button
-        v-if="selectedPayment && !selectedPayment.is_paid"
-        variant="success"
-        :disabled="markingPaid"
-        @click="handleMarkAsPaid"
-      >
-        Označi kao plaćeno
-      </Button>
-      <Button @click="handleEdit">Izmeni</Button>
+      <!-- Mobile: akcije u dropdown-u (otvara se nagore da ne izađe van ekrana) -->
+      <div class="sm:hidden">
+        <Dropdown placement="top">
+          <DropdownItem
+            label="Istorija"
+            :icon="ClockIcon"
+            @click="openHistory"
+          />
+          <DropdownItem
+            v-if="selectedPayment && !selectedPayment.is_paid"
+            label="Označi kao plaćeno"
+            :icon="CheckIcon"
+            @click="handleMarkAsPaid"
+          />
+          <DropdownItem
+            label="Izmeni"
+            :icon="PencilIcon"
+            @click="handleEdit"
+          />
+        </Dropdown>
+      </div>
+      <!-- Desktop: sve akcije kao dugmad -->
+      <div class="hidden gap-2 sm:flex">
+        <Button
+          variant="outline"
+          @click="openHistory"
+        >
+          Istorija
+        </Button>
+        <Button
+          v-if="selectedPayment && !selectedPayment.is_paid"
+          variant="success"
+          :disabled="markingPaid"
+          @click="handleMarkAsPaid"
+        >
+          Označi kao plaćeno
+        </Button>
+        <Button @click="handleEdit">Izmeni</Button>
+      </div>
     </DialogFooter>
   </Dialog>
 
@@ -141,10 +165,11 @@
 </template>
 
 <script setup lang="ts">
-import { BanknotesIcon } from '@heroicons/vue/24/outline';
+import { BanknotesIcon, ClockIcon, CheckIcon, PencilIcon } from '@heroicons/vue/24/outline';
 import type { Payment } from '~/types/database';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
+import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import DashboardCard from '~/components/dashboard/DashboardCard.vue';
 import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
 import PaymentHistoryPopup from '~/components/payments/PaymentHistoryPopup.vue';
@@ -174,8 +199,16 @@ const markingPaid = ref(false);
 const historyOpen = ref(false);
 
 function openHistory(): void {
+  detailOpen.value = false;
   historyOpen.value = true;
 }
+
+// Kad se zatvori istorija, ponovo otvori detalje
+watch(historyOpen, (isOpen, wasOpen) => {
+  if (wasOpen && !isOpen && selectedPayment.value) {
+    detailOpen.value = true;
+  }
+});
 
 async function handleMarkAsPaid(): Promise<void> {
   if (!selectedPayment.value) return;
