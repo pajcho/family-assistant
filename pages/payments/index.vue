@@ -2,20 +2,10 @@
   <div>
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Plaćanja</h1>
-      <div class="flex flex-wrap items-center gap-2">
-        <label class="flex items-center gap-2 text-sm text-gray-600">
-          <input
-            v-model="hidePaid"
-            type="checkbox"
-            class="rounded border-gray-300"
-          />
-          Sakrij plaćene
-        </label>
-        <Button @click="openAdd">
-          <PlusIcon class="mr-2 h-5 w-5" />
-          Dodaj plaćanje
-        </Button>
-      </div>
+      <Button @click="openAdd">
+        <PlusIcon class="mr-2 h-5 w-5" />
+        Dodaj plaćanje
+      </Button>
     </div>
 
     <!-- Month filter buttons -->
@@ -399,7 +389,6 @@ const {
 const allPayments = ref<Payment[]>([]);
 const allHistory = ref<PaymentHistory[]>([]);
 const loading = ref(true);
-const hidePaid = ref(false);
 const selectedMonth = ref('all');
 const dialogOpen = ref(false);
 const deleteDialogOpen = ref(false);
@@ -463,10 +452,6 @@ const combinedList = computed<ListItem[]>(() => {
     if (selectedMonth.value !== 'all' && !p.due_date.startsWith(selectedMonth.value)) {
       continue;
     }
-    // Hide paid if checkbox is checked
-    if (hidePaid.value && p.is_paid) {
-      continue;
-    }
     items.push({ ...p, type: 'payment' });
   }
 
@@ -483,7 +468,6 @@ const combinedList = computed<ListItem[]>(() => {
 
     for (const h of allHistory.value) {
       if (!h.due_date.startsWith(selectedMonth.value)) continue;
-      // Don't hide history entries even if hidePaid is checked
       items.push({
         type: 'history',
         id: h.id,
@@ -644,10 +628,6 @@ async function doUndo(): Promise<void> {
     await loadData();
   }
 }
-
-watch(hidePaid, () => {
-  // No need to reload, combinedList will re-filter
-});
 
 onMounted(() => {
   loadData();
