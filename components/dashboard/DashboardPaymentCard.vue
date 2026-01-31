@@ -105,56 +105,41 @@
                 {{ selectedPayment.remaining_occurrences }} rata
               </dd>
             </div>
+            <!-- Link akcije: Istorija levo, Označi kao plaćeno desno -->
+            <div class="flex justify-between border-t border-gray-200 pt-2 dark:border-gray-600">
+              <button
+                type="button"
+                class="text-sm font-medium text-blue-600 underline-offset-4 hover:underline dark:text-blue-400"
+                @click="openHistory"
+              >
+                Istorija
+              </button>
+              <button
+                v-if="!selectedPayment.is_paid"
+                type="button"
+                class="text-sm font-medium text-blue-600 underline-offset-4 hover:underline dark:text-blue-400"
+                :disabled="markingPaid"
+                @click="handleMarkAsPaid"
+              >
+                Označi kao plaćeno
+              </button>
+              <span
+                v-else
+                class="text-sm text-gray-400 dark:text-gray-500"
+              />
+            </div>
           </dl>
         </div>
       </div>
     </DialogContent>
-    <DialogFooter class="flex flex-wrap items-center gap-2">
+    <DialogFooter>
       <Button
         variant="outline"
         @click="detailOpen = false"
       >
         Zatvori
       </Button>
-      <!-- Mobile: akcije u dropdown-u (otvara se nagore da ne izađe van ekrana) -->
-      <div class="sm:hidden">
-        <Dropdown placement="top">
-          <DropdownItem
-            label="Istorija"
-            :icon="ClockIcon"
-            @click="openHistory"
-          />
-          <DropdownItem
-            v-if="selectedPayment && !selectedPayment.is_paid"
-            label="Označi kao plaćeno"
-            :icon="CheckIcon"
-            @click="handleMarkAsPaid"
-          />
-          <DropdownItem
-            label="Izmeni"
-            :icon="PencilIcon"
-            @click="handleEdit"
-          />
-        </Dropdown>
-      </div>
-      <!-- Desktop: sve akcije kao dugmad -->
-      <div class="hidden gap-2 sm:flex">
-        <Button
-          variant="outline"
-          @click="openHistory"
-        >
-          Istorija
-        </Button>
-        <Button
-          v-if="selectedPayment && !selectedPayment.is_paid"
-          variant="success"
-          :disabled="markingPaid"
-          @click="handleMarkAsPaid"
-        >
-          Označi kao plaćeno
-        </Button>
-        <Button @click="handleEdit">Izmeni</Button>
-      </div>
+      <Button @click="handleEdit">Izmeni</Button>
     </DialogFooter>
   </Dialog>
 
@@ -165,11 +150,10 @@
 </template>
 
 <script setup lang="ts">
-import { BanknotesIcon, ClockIcon, CheckIcon, PencilIcon } from '@heroicons/vue/24/outline';
+import { BanknotesIcon } from '@heroicons/vue/24/outline';
 import type { Payment } from '~/types/database';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
-import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import DashboardCard from '~/components/dashboard/DashboardCard.vue';
 import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
 import PaymentHistoryPopup from '~/components/payments/PaymentHistoryPopup.vue';
