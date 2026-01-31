@@ -1,68 +1,31 @@
 <template>
-  <Card class="flex h-full flex-col">
-    <CardHeader class="pb-2">
-      <div class="flex items-center gap-2">
-        <CakeIcon
-          class="h-5 w-5 shrink-0"
-          :class="
-            upcomingBirthdays.length > 0
-              ? 'text-emerald-600 dark:text-emerald-400'
-              : 'text-gray-400 dark:text-gray-500'
-          "
-        />
-        <CardTitle class="text-sm font-medium text-gray-600 dark:text-gray-300">
-          Rođendani (30 dana)
-        </CardTitle>
-      </div>
-    </CardHeader>
-    <CardContent class="flex flex-1 flex-col">
-      <!-- Upcoming birthdays list -->
-      <div
-        v-if="upcomingBirthdays.length > 0"
-        class="mt-3 space-y-2"
-      >
-        <button
-          v-for="b in upcomingBirthdays.slice(0, 3)"
-          :key="b.id"
-          type="button"
-          class="flex w-full items-center justify-between rounded-md bg-emerald-50 px-3 py-2 text-left text-sm transition-colors hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50"
-          @click="openDetail(b)"
-        >
-          <span class="font-medium text-gray-900 dark:text-gray-100">{{ b.name }}</span>
-          <span class="text-emerald-700 dark:text-emerald-400">{{ daysLabel(b.birth_date) }}</span>
-        </button>
-        <p
-          v-if="upcomingBirthdays.length > 3"
-          class="text-xs text-gray-500 dark:text-gray-400"
-        >
-          + još {{ upcomingBirthdays.length - 3 }}
-        </p>
-      </div>
+  <DashboardCard
+    :icon="CakeIcon"
+    title="Rođendani (30 dana)"
+    empty-message="Nema rođendana u narednih 30 dana"
+    add-label="Dodaj rođendan"
+    view-all-link="/birthdays"
+    :has-items="upcomingBirthdays.length > 0"
+    variant="emerald"
+    @add="$emit('add')"
+  >
+    <template #items>
+      <DashboardCardItem
+        v-for="b in upcomingBirthdays.slice(0, 3)"
+        :key="b.id"
+        :label="b.name"
+        :value="daysLabel(b.birth_date)"
+        variant="emerald"
+        @click="openDetail(b)"
+      />
       <p
-        v-else
-        class="mt-1 text-xs text-gray-500 dark:text-gray-400"
+        v-if="upcomingBirthdays.length > 3"
+        class="text-xs text-gray-500 dark:text-gray-400"
       >
-        Nema rođendana u narednih 30 dana
+        + još {{ upcomingBirthdays.length - 3 }}
       </p>
-
-      <div class="mt-auto flex flex-wrap gap-2 pt-4">
-        <Button
-          size="sm"
-          @click="$emit('add')"
-        >
-          Dodaj rođendan
-        </Button>
-        <NuxtLink to="/birthdays">
-          <Button
-            variant="outline"
-            size="sm"
-          >
-            Pogledaj sve
-          </Button>
-        </NuxtLink>
-      </div>
-    </CardContent>
-  </Card>
+    </template>
+  </DashboardCard>
 
   <!-- Detail popup -->
   <Dialog
@@ -143,9 +106,10 @@
 <script setup lang="ts">
 import { CakeIcon } from '@heroicons/vue/24/outline';
 import type { Birthday } from '~/types/database';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
+import DashboardCard from '~/components/dashboard/DashboardCard.vue';
+import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
 import {
   daysUntilBirthday,
   currentAge,

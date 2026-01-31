@@ -1,68 +1,31 @@
 <template>
-  <Card class="flex h-full flex-col">
-    <CardHeader class="pb-2">
-      <div class="flex items-center gap-2">
-        <CalendarIcon
-          class="h-5 w-5 shrink-0"
-          :class="
-            upcomingEvents.length > 0
-              ? 'text-blue-600 dark:text-blue-400'
-              : 'text-gray-400 dark:text-gray-500'
-          "
-        />
-        <CardTitle class="text-sm font-medium text-gray-600 dark:text-gray-300">
-          Događaji (14 dana)
-        </CardTitle>
-      </div>
-    </CardHeader>
-    <CardContent class="flex flex-1 flex-col">
-      <!-- Upcoming events list -->
-      <div
-        v-if="upcomingEvents.length > 0"
-        class="space-y-2"
-      >
-        <button
-          v-for="e in upcomingEvents.slice(0, 3)"
-          :key="e.id"
-          type="button"
-          class="flex w-full items-center justify-between rounded-md bg-blue-50 px-3 py-2 text-left text-sm transition-colors hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50"
-          @click="openDetail(e)"
-        >
-          <span class="font-medium text-gray-900 dark:text-gray-100">{{ e.name }}</span>
-          <span class="text-blue-700 dark:text-blue-400">{{ eventDateLabel(e.date) }}</span>
-        </button>
-        <p
-          v-if="upcomingEvents.length > 3"
-          class="text-xs text-gray-500 dark:text-gray-400"
-        >
-          + još {{ upcomingEvents.length - 3 }}
-        </p>
-      </div>
+  <DashboardCard
+    :icon="CalendarIcon"
+    title="Događaji (14 dana)"
+    empty-message="Nema nadolazećih događaja"
+    add-label="Dodaj događaj"
+    view-all-link="/events"
+    :has-items="upcomingEvents.length > 0"
+    variant="blue"
+    @add="$emit('add')"
+  >
+    <template #items>
+      <DashboardCardItem
+        v-for="e in upcomingEvents.slice(0, 3)"
+        :key="e.id"
+        :label="e.name"
+        :value="eventDateLabel(e.date)"
+        variant="blue"
+        @click="openDetail(e)"
+      />
       <p
-        v-else
-        class="text-sm text-gray-500 dark:text-gray-400"
+        v-if="upcomingEvents.length > 3"
+        class="text-xs text-gray-500 dark:text-gray-400"
       >
-        Nema nadolazećih događaja
+        + još {{ upcomingEvents.length - 3 }}
       </p>
-
-      <div class="mt-auto flex flex-wrap gap-2 pt-4">
-        <Button
-          size="sm"
-          @click="$emit('add')"
-        >
-          Dodaj događaj
-        </Button>
-        <NuxtLink to="/events">
-          <Button
-            variant="outline"
-            size="sm"
-          >
-            Pogledaj sve
-          </Button>
-        </NuxtLink>
-      </div>
-    </CardContent>
-  </Card>
+    </template>
+  </DashboardCard>
 
   <!-- Detail popup -->
   <Dialog
@@ -141,9 +104,10 @@
 <script setup lang="ts">
 import { CalendarIcon } from '@heroicons/vue/24/outline';
 import type { Event } from '~/types/database';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
+import DashboardCard from '~/components/dashboard/DashboardCard.vue';
+import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
 import { formatDate, formatTime } from '~/utils/format';
 
 interface Props {

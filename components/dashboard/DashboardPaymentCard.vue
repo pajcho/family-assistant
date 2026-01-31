@@ -1,68 +1,31 @@
 <template>
-  <Card class="flex h-full flex-col">
-    <CardHeader class="pb-2">
-      <div class="flex items-center gap-2">
-        <BanknotesIcon
-          class="h-5 w-5 shrink-0"
-          :class="
-            upcomingPayments.length > 0
-              ? 'text-amber-600 dark:text-amber-400'
-              : 'text-gray-400 dark:text-gray-500'
-          "
-        />
-        <CardTitle class="text-sm font-medium text-gray-600 dark:text-gray-300">
-          Plaćanja (7 dana)
-        </CardTitle>
-      </div>
-    </CardHeader>
-    <CardContent class="flex flex-1 flex-col">
-      <!-- Upcoming payments list -->
-      <div
-        v-if="upcomingPayments.length > 0"
-        class="space-y-2"
-      >
-        <button
-          v-for="p in upcomingPayments.slice(0, 3)"
-          :key="p.id"
-          type="button"
-          class="flex w-full items-center justify-between rounded-md bg-amber-50 px-3 py-2 text-left text-sm transition-colors hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50"
-          @click="openDetail(p)"
-        >
-          <span class="font-medium text-gray-900 dark:text-gray-100">{{ p.name }}</span>
-          <span class="text-amber-700 dark:text-amber-400">{{ formatAmount(p.amount) }}</span>
-        </button>
-        <p
-          v-if="upcomingPayments.length > 3"
-          class="text-xs text-gray-500 dark:text-gray-400"
-        >
-          + još {{ upcomingPayments.length - 3 }}
-        </p>
-      </div>
+  <DashboardCard
+    :icon="BanknotesIcon"
+    title="Plaćanja (7 dana)"
+    empty-message="Nema plaćanja ove nedelje"
+    add-label="Dodaj plaćanje"
+    view-all-link="/payments"
+    :has-items="upcomingPayments.length > 0"
+    variant="amber"
+    @add="$emit('add')"
+  >
+    <template #items>
+      <DashboardCardItem
+        v-for="p in upcomingPayments.slice(0, 3)"
+        :key="p.id"
+        :label="p.name"
+        :value="formatAmount(p.amount)"
+        variant="amber"
+        @click="openDetail(p)"
+      />
       <p
-        v-else
-        class="text-sm text-gray-500 dark:text-gray-400"
+        v-if="upcomingPayments.length > 3"
+        class="text-xs text-gray-500 dark:text-gray-400"
       >
-        Nema plaćanja ove nedelje
+        + još {{ upcomingPayments.length - 3 }}
       </p>
-
-      <div class="mt-auto flex flex-wrap gap-2 pt-4">
-        <Button
-          size="sm"
-          @click="$emit('add')"
-        >
-          Dodaj plaćanje
-        </Button>
-        <NuxtLink to="/payments">
-          <Button
-            variant="outline"
-            size="sm"
-          >
-            Pogledaj sve
-          </Button>
-        </NuxtLink>
-      </div>
-    </CardContent>
-  </Card>
+    </template>
+  </DashboardCard>
 
   <!-- Detail popup -->
   <Dialog
@@ -169,9 +132,10 @@
 <script setup lang="ts">
 import { BanknotesIcon } from '@heroicons/vue/24/outline';
 import type { Payment } from '~/types/database';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
+import DashboardCard from '~/components/dashboard/DashboardCard.vue';
+import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
 import { formatDate, formatAmount } from '~/utils/format';
 import { usePayments } from '~/composables/usePayments';
 
