@@ -1,5 +1,5 @@
 <template>
-  <nav class="border-b border-gray-200 bg-white">
+  <nav class="w-full border-b border-gray-200 bg-white">
     <div class="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
       <div class="flex items-center gap-6">
         <NuxtLink
@@ -11,7 +11,7 @@
         <div class="hidden gap-1 sm:flex">
           <NavLink
             to="/"
-            label="Kontrolna tabla"
+            label="Početna"
             :icon="HomeIcon"
           />
           <NavLink
@@ -31,7 +31,7 @@
           />
           <NavLink
             to="/expenses"
-            label="Planirana izdvajanja"
+            label="Izdvajanja"
             :icon="ShoppingBagIcon"
           />
         </div>
@@ -46,32 +46,39 @@
         <span class="ml-2 hidden sm:inline">Odjavi se</span>
       </Button>
     </div>
-    <!-- Mobile bottom nav -->
-    <div class="flex justify-around border-t border-gray-200 py-2 sm:hidden">
+    <!-- Mobile bottom nav with horizontal scroll -->
+    <div
+      class="scrollbar-hide flex w-full gap-1 overflow-x-auto border-t border-gray-200 px-4 py-2 sm:hidden"
+    >
       <NavLink
         to="/"
         label="Početna"
         :icon="HomeIcon"
+        class="shrink-0"
       />
       <NavLink
         to="/events"
         label="Događaji"
         :icon="CalendarIcon"
+        class="shrink-0"
       />
       <NavLink
         to="/payments"
         label="Plaćanja"
         :icon="BanknotesIcon"
+        class="shrink-0"
       />
       <NavLink
         to="/birthdays"
         label="Rođendani"
         :icon="CakeIcon"
+        class="shrink-0"
       />
       <NavLink
         to="/expenses"
         label="Izdvajanja"
         :icon="ShoppingBagIcon"
+        class="shrink-0"
       />
     </div>
   </nav>

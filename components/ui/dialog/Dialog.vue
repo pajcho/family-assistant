@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div
       v-if="open"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4"
+      class="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       :aria-labelledby="titleId"
@@ -13,9 +13,13 @@
         @click="$emit('update:open', false)"
       />
       <div
-        class="relative z-10 w-full max-w-lg rounded-lg bg-white shadow-xl"
+        class="relative z-10 max-h-[90vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:max-w-lg sm:rounded-lg"
         @click.stop
       >
+        <!-- Mobile drag handle -->
+        <div class="flex justify-center py-2 sm:hidden">
+          <div class="h-1 w-10 rounded-full bg-gray-300" />
+        </div>
         <slot />
       </div>
     </div>

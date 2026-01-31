@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen w-full overflow-x-hidden bg-gray-50">
     <AppNav v-if="showNav" />
     <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <slot />
