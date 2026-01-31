@@ -50,26 +50,35 @@
             v-model="form.recurrence_period"
             type="radio"
             value="one-time"
+            :disabled="hasHistory"
           />
-          <span>Jednokratno</span>
+          <span :class="{ 'text-gray-400': hasHistory }">Jednokratno</span>
         </label>
         <label class="flex items-center gap-2">
           <input
             v-model="form.recurrence_period"
             type="radio"
             value="monthly"
+            :disabled="hasHistory"
           />
-          <span>Mesečno</span>
+          <span :class="{ 'text-gray-400': hasHistory }">Mesečno</span>
         </label>
         <label class="flex items-center gap-2">
           <input
             v-model="form.recurrence_period"
             type="radio"
             value="limited"
+            :disabled="hasHistory"
           />
-          <span>Ograničeno</span>
+          <span :class="{ 'text-gray-400': hasHistory }">Ograničeno</span>
         </label>
       </div>
+      <p
+        v-if="hasHistory"
+        class="text-xs text-amber-600"
+      >
+        Tip plaćanja se ne može menjati jer postoji istorija plaćanja.
+      </p>
     </div>
     <div
       v-if="form.recurrence_period === 'limited'"
@@ -83,6 +92,25 @@
         min="1"
         placeholder="npr. 4"
       />
+    </div>
+    <div
+      v-if="isEdit && form.recurrence_period !== 'one-time'"
+      class="space-y-2"
+    >
+      <label class="flex items-center gap-2">
+        <input
+          v-model="form.is_paused"
+          type="checkbox"
+          class="rounded border-gray-300"
+        />
+        <span class="text-sm text-gray-700">Pauziraj plaćanje</span>
+      </label>
+      <p
+        v-if="form.is_paused"
+        class="text-xs text-gray-500"
+      >
+        Dok je pauzirano, plaćanje se neće prikazivati kao dospelo.
+      </p>
     </div>
     <div class="flex justify-end gap-2 pt-2">
       <Button
@@ -110,9 +138,13 @@ import { Label } from '~/components/ui/label';
 
 interface Props {
   payment?: Payment | null;
+  hasHistory?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  hasHistory: false,
+});
+
 const emit = defineEmits<{
   submit: [
     payload: {
@@ -123,6 +155,7 @@ const emit = defineEmits<{
       is_recurring: boolean;
       recurrence_period: RecurrencePeriod | null;
       remaining_occurrences?: number | null;
+      is_paused?: boolean;
     },
   ];
   cancel: [];
@@ -141,6 +174,7 @@ const form = reactive({
     | 'monthly'
     | 'limited',
   remaining_occurrences: props.payment?.remaining_occurrences ?? 4,
+  is_paused: props.payment?.is_paused ?? false,
 });
 
 watch(
@@ -153,6 +187,7 @@ watch(
       form.due_date = p.due_date;
       form.recurrence_period = (p.recurrence_period ?? 'one-time') as RecurrencePeriod;
       form.remaining_occurrences = p.remaining_occurrences ?? 4;
+      form.is_paused = p.is_paused ?? false;
     }
   },
   { immediate: true },
@@ -173,6 +208,7 @@ function onSubmit(): void {
     recurrence_period: form.recurrence_period === 'one-time' ? 'one-time' : form.recurrence_period,
     remaining_occurrences:
       form.recurrence_period === 'limited' ? (form.remaining_occurrences ?? null) : null,
+    is_paused: isRecurring ? form.is_paused : false,
   });
   saving.value = false;
 }

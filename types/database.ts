@@ -40,9 +40,20 @@ export interface Payment {
   recurrence_period: RecurrencePeriod | null;
   remaining_occurrences: number | null;
   is_paid: boolean;
+  is_paused: boolean;
   paid_date: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface PaymentHistory {
+  id: string;
+  payment_id: string;
+  family_id: string;
+  amount: number;
+  due_date: string;
+  paid_date: string;
+  created_at: string;
 }
 
 export interface Birthday {

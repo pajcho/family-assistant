@@ -178,7 +178,7 @@ async function handleMarkAsPaid(): Promise<void> {
   }
 }
 
-// Filter unpaid payments within 7 days and sort by due date
+// Filter unpaid, non-paused payments within 7 days and sort by due date
 const upcomingPayments = computed(() => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -187,7 +187,7 @@ const upcomingPayments = computed(() => {
 
   return props.payments
     .filter((p) => {
-      if (p.is_paid) return false;
+      if (p.is_paid || p.is_paused) return false;
       const dueDate = new Date(p.due_date + 'T00:00:00');
       return dueDate >= today && dueDate <= in7;
     })

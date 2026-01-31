@@ -25,3 +25,10 @@ export function addMonth(dateStr: string): string {
   d.setMonth(d.getMonth() + 1);
   return d.toISOString().slice(0, 10);
 }
+
+/** Subtract one month from YYYY-MM-DD string */
+export function subtractMonth(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setMonth(d.getMonth() - 1);
+  return d.toISOString().slice(0, 10);
+}
