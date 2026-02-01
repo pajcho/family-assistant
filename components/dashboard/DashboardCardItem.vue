@@ -8,7 +8,18 @@
     <span class="flex min-w-0 flex-1 items-center gap-2">
       <span class="truncate font-medium text-gray-900 dark:text-gray-100">{{ label }}</span>
       <span
-        v-if="badge"
+        v-if="badgeIcon"
+        class="shrink-0"
+        :class="badgeIconClasses"
+        :title="badgeIconTitle"
+      >
+        <component
+          :is="badgeIcon"
+          class="h-4 w-4"
+        />
+      </span>
+      <span
+        v-else-if="badge"
         class="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium"
         :class="badgeClasses"
       >
@@ -20,16 +31,24 @@
 </template>
 
 <script setup lang="ts">
+import type { Component } from 'vue';
+
 interface Props {
   label: string;
   value: string;
   variant?: 'blue' | 'amber' | 'emerald' | 'purple' | 'red';
   badge?: string;
+  /** Icon component (e.g. for overdue indicator). Shown instead of badge when set. */
+  badgeIcon?: Component;
+  /** Optional title/tooltip for badgeIcon. */
+  badgeIconTitle?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   variant: 'blue',
   badge: undefined,
+  badgeIcon: undefined,
+  badgeIconTitle: undefined,
 });
 
 defineEmits<{ click: [] }>();
@@ -62,5 +81,12 @@ const badgeClasses = computed(() => {
     return 'bg-red-200 text-red-800 dark:bg-red-800/60 dark:text-red-200';
   }
   return 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200';
+});
+
+const badgeIconClasses = computed(() => {
+  if (props.variant === 'red') {
+    return 'text-red-600 dark:text-red-400';
+  }
+  return 'text-gray-500 dark:text-gray-400';
 });
 </script>

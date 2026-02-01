@@ -412,7 +412,6 @@ import { formatDate, formatAmount } from '~/utils/format';
 import {
   isOverdue,
   getDueDateInMonth,
-  addMonth,
   currentMonthYYYYMM,
   getLimitedMonths as getLimitedMonthsFromDate,
 } from '~/utils/date';
@@ -507,7 +506,7 @@ const monthFilters = computed(() => {
   const today = new Date();
   const filters = [{ label: 'Sva', value: 'all' }];
 
-  for (let i = -1; i < 4; i++) {
+  for (let i = 0; i < 3; i++) {
     const date = new Date(today.getFullYear(), today.getMonth() + i, 1);
     const monthIndex = date.getMonth();
     filters.push({

@@ -1,7 +1,7 @@
 <template>
   <DashboardCard
     :icon="BanknotesIcon"
-    title="Plaćanja (prekoračena + 7 dana)"
+    title="Predstojeca plaćanja"
     empty-message="Nema plaćanja za prikaz"
     add-label="Dodaj plaćanje"
     view-all-link="/payments"
@@ -16,7 +16,8 @@
         :label="p.name"
         :value="formatAmount(p.amount)"
         :variant="isOverdue(p.due_date) ? 'red' : 'amber'"
-        :badge="isOverdue(p.due_date) ? 'Prekoračeno' : undefined"
+        :badge-icon="isOverdue(p.due_date) ? ExclamationTriangleIcon : undefined"
+        :badge-icon-title="isOverdue(p.due_date) ? 'Prekoračeno' : undefined"
         @click="openDetail(p)"
       />
       <p
@@ -157,7 +158,7 @@
 </template>
 
 <script setup lang="ts">
-import { BanknotesIcon } from '@heroicons/vue/24/outline';
+import { BanknotesIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
 import type { Payment } from '~/types/database';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
