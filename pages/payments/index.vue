@@ -54,6 +54,12 @@
               >
                 Plaćeno
               </span>
+              <span
+                v-else-if="item.type === 'payment' && !item.is_paused && isOverdue(item.due_date)"
+                class="rounded bg-red-200 px-1.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-800/60 dark:text-red-200"
+              >
+                Prekoračeno
+              </span>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400">
               {{ formatDate(item.due_date) }} · {{ formatAmount(item.amount) }}
@@ -456,7 +462,7 @@ const monthFilters = computed(() => {
   const today = new Date();
   const filters = [{ label: 'Sva', value: 'all' }];
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = -1; i < 4; i++) {
     const date = new Date(today.getFullYear(), today.getMonth() + i, 1);
     const monthIndex = date.getMonth();
     filters.push({
@@ -556,6 +562,13 @@ const summary = computed(() => {
   return { type: 'month' as const, unpaidTotal, paidTotal };
 });
 
+function isOverdue(dueDateStr: string): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDateStr + 'T00:00:00');
+  return due < today;
+}
+
 function getItemClass(item: ListItem): string {
   if (item.type === 'history') {
     return 'border border-gray-200/80 bg-gray-50 opacity-75 dark:border-gray-700 dark:bg-gray-800/80';
@@ -565,6 +578,10 @@ function getItemClass(item: ListItem): string {
   }
   if (item.is_paid) {
     return 'border border-gray-200/80 bg-gray-50 opacity-75 dark:border-gray-700 dark:bg-gray-800/80';
+  }
+  // Overdue unpaid: subtle red border so it stands out
+  if (item.type === 'payment' && isOverdue(item.due_date)) {
+    return 'border border-red-200 dark:border-red-800/60 bg-red-50/50 dark:bg-red-900/20';
   }
   return 'border border-gray-200 dark:border-gray-700';
 }

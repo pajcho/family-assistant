@@ -1,28 +1,29 @@
 <template>
   <DashboardCard
     :icon="BanknotesIcon"
-    title="Plaćanja (7 dana)"
-    empty-message="Nema plaćanja ove nedelje"
+    title="Plaćanja (prekoračena + 7 dana)"
+    empty-message="Nema plaćanja za prikaz"
     add-label="Dodaj plaćanje"
     view-all-link="/payments"
-    :has-items="upcomingPayments.length > 0"
+    :has-items="duePayments.length > 0"
     variant="amber"
     @add="$emit('add')"
   >
     <template #items>
       <DashboardCardItem
-        v-for="p in upcomingPayments.slice(0, 3)"
+        v-for="p in duePayments.slice(0, 5)"
         :key="p.id"
         :label="p.name"
         :value="formatAmount(p.amount)"
-        variant="amber"
+        :variant="isOverdue(p.due_date) ? 'red' : 'amber'"
+        :badge="isOverdue(p.due_date) ? 'Prekoračeno' : undefined"
         @click="openDetail(p)"
       />
       <p
-        v-if="upcomingPayments.length > 3"
+        v-if="duePayments.length > 5"
         class="text-xs text-gray-500 dark:text-gray-400"
       >
-        + još {{ upcomingPayments.length - 3 }}
+        + još {{ duePayments.length - 5 }}
       </p>
     </template>
   </DashboardCard>
@@ -68,8 +69,14 @@
             </div>
             <div class="flex justify-between">
               <dt class="text-gray-500 dark:text-gray-400">Datum dospeća:</dt>
-              <dd class="font-medium text-gray-900 dark:text-gray-100">
+              <dd class="flex items-center gap-2 font-medium text-gray-900 dark:text-gray-100">
                 {{ formatDate(selectedPayment.due_date) }}
+                <span
+                  v-if="!selectedPayment.is_paid && isOverdue(selectedPayment.due_date)"
+                  class="rounded bg-red-200 px-1.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-800/60 dark:text-red-200"
+                >
+                  Prekoračeno
+                </span>
               </dd>
             </div>
             <div class="flex justify-between">
@@ -205,20 +212,41 @@ async function handleMarkAsPaid(): Promise<void> {
   }
 }
 
-// Filter unpaid, non-paused payments within 7 days and sort by due date
-const upcomingPayments = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+const todayAtMidnight = (): Date => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+function isOverdue(dueDateStr: string): boolean {
+  const due = new Date(dueDateStr + 'T00:00:00');
+  const today = todayAtMidnight();
+  return due < today;
+}
+
+// Unpaid, non-paused: overdue (due_date < today) + upcoming (today <= due_date <= today+7), sorted: overdue first, then upcoming by due_date
+const duePayments = computed(() => {
+  const today = todayAtMidnight();
   const in7 = new Date(today);
   in7.setDate(in7.getDate() + 7);
 
-  return props.payments
+  const unpaid = props.payments.filter((p) => !p.is_paid && !p.is_paused);
+  const overdue = unpaid
     .filter((p) => {
-      if (p.is_paid || p.is_paused) return false;
-      const dueDate = new Date(p.due_date + 'T00:00:00');
-      return dueDate >= today && dueDate <= in7;
+      const due = new Date(p.due_date + 'T00:00:00');
+      return due < today;
     })
+    .slice()
     .toSorted((a, b) => a.due_date.localeCompare(b.due_date));
+  const upcoming = unpaid
+    .filter((p) => {
+      const due = new Date(p.due_date + 'T00:00:00');
+      return due >= today && due <= in7;
+    })
+    .slice()
+    .toSorted((a, b) => a.due_date.localeCompare(b.due_date));
+
+  return [...overdue, ...upcoming];
 });
 
 function recurrenceLabel(p: Payment): string {
