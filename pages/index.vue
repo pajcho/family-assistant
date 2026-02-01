@@ -1,157 +1,159 @@
 <template>
-  <div>
-    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">
-      {{ familyName ? `Porodica ${familyName}` : 'Kontrolna tabla' }}
-    </h1>
-    <p class="mt-1 text-gray-600 dark:text-gray-400">
-      Dobrodošli nazad! Pregled nadolazećih obaveza.
-    </p>
+  <PullToRefresh :on-refresh="refreshData">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">
+        {{ familyName ? `Porodica ${familyName}` : 'Kontrolna tabla' }}
+      </h1>
+      <p class="mt-1 text-gray-600 dark:text-gray-400">
+        Dobrodošli nazad! Pregled nadolazećih obaveza.
+      </p>
 
-    <div
-      v-if="!familyId"
-      class="mt-6 text-gray-500 dark:text-gray-400"
-    >
-      Učitavanje…
+      <div
+        v-if="!familyId"
+        class="mt-6 text-gray-500 dark:text-gray-400"
+      >
+        Učitavanje…
+      </div>
+      <div
+        v-else
+        class="stagger-fade-in mt-6 grid gap-4 sm:grid-cols-2"
+      >
+        <DashboardEventCard
+          :events="allEvents"
+          @add="openAddEvent"
+          @edit="openEditEvent"
+        />
+        <DashboardPaymentCard
+          :payments="allPayments"
+          @add="openAddPayment"
+          @updated="loadPayments"
+          @edit="openEditPayment"
+        />
+        <DashboardBirthdayCard
+          :birthdays="allBirthdays"
+          @add="openAddBirthday"
+          @edit="openEditBirthday"
+        />
+        <DashboardExpenseCard
+          :expenses="allExpenses"
+          @add="openAddExpense"
+          @edit="openEditExpense"
+        />
+      </div>
+
+      <!-- Event Dialog (Add/Edit) -->
+      <Dialog
+        v-model:open="eventDialogOpen"
+        title-id="event-dialog-title"
+      >
+        <DialogHeader>
+          <h2
+            id="event-dialog-title"
+            class="text-lg font-semibold"
+          >
+            {{ editingEvent ? 'Izmeni događaj' : 'Dodaj događaj' }}
+          </h2>
+        </DialogHeader>
+        <DialogContent>
+          <div
+            v-if="eventError"
+            class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
+          >
+            {{ eventError }}
+          </div>
+          <EventForm
+            :event="editingEvent"
+            @submit="onEventSubmit"
+            @cancel="eventDialogOpen = false"
+          />
+        </DialogContent>
+      </Dialog>
+
+      <!-- Payment Dialog (Add/Edit) -->
+      <Dialog
+        v-model:open="paymentDialogOpen"
+        title-id="payment-dialog-title"
+      >
+        <DialogHeader>
+          <h2
+            id="payment-dialog-title"
+            class="text-lg font-semibold"
+          >
+            {{ editingPayment ? 'Izmeni plaćanje' : 'Dodaj plaćanje' }}
+          </h2>
+        </DialogHeader>
+        <DialogContent>
+          <div
+            v-if="paymentError"
+            class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
+          >
+            {{ paymentError }}
+          </div>
+          <PaymentForm
+            :payment="editingPayment"
+            @submit="onPaymentSubmit"
+            @cancel="paymentDialogOpen = false"
+          />
+        </DialogContent>
+      </Dialog>
+
+      <!-- Birthday Dialog (Add/Edit) -->
+      <Dialog
+        v-model:open="birthdayDialogOpen"
+        title-id="birthday-dialog-title"
+      >
+        <DialogHeader>
+          <h2
+            id="birthday-dialog-title"
+            class="text-lg font-semibold"
+          >
+            {{ editingBirthday ? 'Izmeni rođendan' : 'Dodaj rođendan' }}
+          </h2>
+        </DialogHeader>
+        <DialogContent>
+          <div
+            v-if="birthdayError"
+            class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
+          >
+            {{ birthdayError }}
+          </div>
+          <BirthdayForm
+            :birthday="editingBirthday"
+            @submit="onBirthdaySubmit"
+            @cancel="birthdayDialogOpen = false"
+          />
+        </DialogContent>
+      </Dialog>
+
+      <!-- Expense Dialog (Add/Edit) -->
+      <Dialog
+        v-model:open="expenseDialogOpen"
+        title-id="expense-dialog-title"
+      >
+        <DialogHeader>
+          <h2
+            id="expense-dialog-title"
+            class="text-lg font-semibold"
+          >
+            {{ editingExpense ? 'Izmeni trošak' : 'Dodaj trošak' }}
+          </h2>
+        </DialogHeader>
+        <DialogContent>
+          <div
+            v-if="expenseError"
+            class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
+          >
+            {{ expenseError }}
+          </div>
+          <ExpenseForm
+            :expense="editingExpense"
+            @submit="onExpenseSubmit"
+            @cancel="expenseDialogOpen = false"
+          />
+        </DialogContent>
+      </Dialog>
     </div>
-    <div
-      v-else
-      class="stagger-fade-in mt-6 grid gap-4 sm:grid-cols-2"
-    >
-      <DashboardEventCard
-        :events="allEvents"
-        @add="openAddEvent"
-        @edit="openEditEvent"
-      />
-      <DashboardPaymentCard
-        :payments="allPayments"
-        @add="openAddPayment"
-        @updated="loadPayments"
-        @edit="openEditPayment"
-      />
-      <DashboardBirthdayCard
-        :birthdays="allBirthdays"
-        @add="openAddBirthday"
-        @edit="openEditBirthday"
-      />
-      <DashboardExpenseCard
-        :expenses="allExpenses"
-        @add="openAddExpense"
-        @edit="openEditExpense"
-      />
-    </div>
-
-    <!-- Event Dialog (Add/Edit) -->
-    <Dialog
-      v-model:open="eventDialogOpen"
-      title-id="event-dialog-title"
-    >
-      <DialogHeader>
-        <h2
-          id="event-dialog-title"
-          class="text-lg font-semibold"
-        >
-          {{ editingEvent ? 'Izmeni događaj' : 'Dodaj događaj' }}
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <div
-          v-if="eventError"
-          class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
-        >
-          {{ eventError }}
-        </div>
-        <EventForm
-          :event="editingEvent"
-          @submit="onEventSubmit"
-          @cancel="eventDialogOpen = false"
-        />
-      </DialogContent>
-    </Dialog>
-
-    <!-- Payment Dialog (Add/Edit) -->
-    <Dialog
-      v-model:open="paymentDialogOpen"
-      title-id="payment-dialog-title"
-    >
-      <DialogHeader>
-        <h2
-          id="payment-dialog-title"
-          class="text-lg font-semibold"
-        >
-          {{ editingPayment ? 'Izmeni plaćanje' : 'Dodaj plaćanje' }}
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <div
-          v-if="paymentError"
-          class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
-        >
-          {{ paymentError }}
-        </div>
-        <PaymentForm
-          :payment="editingPayment"
-          @submit="onPaymentSubmit"
-          @cancel="paymentDialogOpen = false"
-        />
-      </DialogContent>
-    </Dialog>
-
-    <!-- Birthday Dialog (Add/Edit) -->
-    <Dialog
-      v-model:open="birthdayDialogOpen"
-      title-id="birthday-dialog-title"
-    >
-      <DialogHeader>
-        <h2
-          id="birthday-dialog-title"
-          class="text-lg font-semibold"
-        >
-          {{ editingBirthday ? 'Izmeni rođendan' : 'Dodaj rođendan' }}
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <div
-          v-if="birthdayError"
-          class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
-        >
-          {{ birthdayError }}
-        </div>
-        <BirthdayForm
-          :birthday="editingBirthday"
-          @submit="onBirthdaySubmit"
-          @cancel="birthdayDialogOpen = false"
-        />
-      </DialogContent>
-    </Dialog>
-
-    <!-- Expense Dialog (Add/Edit) -->
-    <Dialog
-      v-model:open="expenseDialogOpen"
-      title-id="expense-dialog-title"
-    >
-      <DialogHeader>
-        <h2
-          id="expense-dialog-title"
-          class="text-lg font-semibold"
-        >
-          {{ editingExpense ? 'Izmeni trošak' : 'Dodaj trošak' }}
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <div
-          v-if="expenseError"
-          class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
-        >
-          {{ expenseError }}
-        </div>
-        <ExpenseForm
-          :expense="editingExpense"
-          @submit="onExpenseSubmit"
-          @cancel="expenseDialogOpen = false"
-        />
-      </DialogContent>
-    </Dialog>
-  </div>
+  </PullToRefresh>
 </template>
 
 <script setup lang="ts">
@@ -169,6 +171,7 @@ import { useEvents } from '~/composables/useEvents';
 import { usePayments } from '~/composables/usePayments';
 import { useBirthdays } from '~/composables/useBirthdays';
 import { useExpenses } from '~/composables/useExpenses';
+import PullToRefresh from '~/components/PullToRefresh.vue';
 
 definePageMeta({ layout: 'default' });
 
@@ -383,11 +386,13 @@ async function loadExpenses(): Promise<void> {
   allExpenses.value = (data as Expense[]) ?? [];
 }
 
-onMounted(async () => {
+async function refreshData(): Promise<void> {
   await fetchProfile();
   if (!familyId.value) return;
-
-  // Load all data in parallel
   await Promise.all([loadEvents(), loadPayments(), loadBirthdays(), loadExpenses()]);
+}
+
+onMounted(() => {
+  refreshData();
 });
 </script>
