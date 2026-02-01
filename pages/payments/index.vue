@@ -49,7 +49,7 @@
             <div class="flex flex-wrap items-center gap-2">
               <p class="font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
               <span
-                v-if="item.type === 'history' || item.is_paid"
+                v-if="item.type === 'history' || (item.type === 'payment' && item.is_paid)"
                 class="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400"
               >
                 Plaćeno
@@ -59,6 +59,12 @@
                 class="rounded bg-red-200 px-1.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-800/60 dark:text-red-200"
               >
                 Prekoračeno
+              </span>
+              <span
+                v-else-if="item.type === 'upcoming'"
+                class="rounded bg-sky-100 px-1.5 py-0.5 text-xs font-medium text-sky-700 dark:bg-sky-900/50 dark:text-sky-400"
+              >
+                Nadolazeće
               </span>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -75,6 +81,24 @@
               <template v-if="item.type === 'history'">
                 <span class="font-medium text-emerald-600 dark:text-emerald-400">
                   Plaćeno {{ formatDate(item.paid_date) }}
+                </span>
+              </template>
+              <!-- Upcoming (informational only) -->
+              <template v-else-if="item.type === 'upcoming'">
+                <span class="font-medium text-sky-600 dark:text-sky-400">Nadolazeće</span>
+                <span
+                  v-if="item.recurrence_period === 'monthly'"
+                  class="text-gray-500 dark:text-gray-400"
+                >
+                  Mesečno
+                </span>
+                <span
+                  v-else-if="
+                    item.recurrence_period === 'limited' && item.remaining_occurrences != null
+                  "
+                  class="text-gray-500 dark:text-gray-400"
+                >
+                  Ostalo {{ item.remaining_occurrences }} uplata
                 </span>
               </template>
               <!-- Paused payment -->
@@ -131,6 +155,7 @@
               </Button>
             </div>
           </template>
+          <!-- Upcoming: no actions (informational only) -->
           <!-- Payment: Actions -->
           <template v-if="item.type === 'payment'">
             <!-- Mobile: Dropdown -->
@@ -383,7 +408,7 @@ import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/
 import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import PaymentForm from '~/components/payments/PaymentForm.vue';
 import PaymentHistoryPopup from '~/components/payments/PaymentHistoryPopup.vue';
-import { formatDate, formatAmount } from '~/utils/format';
+import { formatDate, formatAmount, getDueDateInMonth, addMonth } from '~/utils/format';
 import { usePayments } from '~/composables/usePayments';
 import { useProfile } from '~/composables/useProfile';
 
@@ -405,7 +430,20 @@ interface HistoryListItem {
   isLast: boolean;
 }
 
-type ListItem = PaymentListItem | HistoryListItem;
+/** Informational row for a future month (no actions). */
+interface UpcomingListItem {
+  type: 'upcoming';
+  id: string;
+  paymentId: string;
+  name: string;
+  amount: number;
+  due_date: string;
+  description: string | null;
+  recurrence_period: RecurrencePeriod | null;
+  remaining_occurrences: number | null;
+}
+
+type ListItem = PaymentListItem | HistoryListItem | UpcomingListItem;
 
 const { fetchProfile, familyId } = useProfile();
 const {
@@ -483,22 +521,38 @@ const paymentNameMap = computed(() => {
   return map;
 });
 
+// Current month YYYY-MM
+const currentMonthYYYYMM = (): string => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+};
+
+// For limited payment: list of YYYY-MM for next remaining_occurrences months (including due_date month)
+function getLimitedMonths(p: Payment): string[] {
+  const n = Math.max(0, p.remaining_occurrences ?? 0);
+  const months: string[] = [];
+  let d = p.due_date;
+  for (let i = 0; i < n; i++) {
+    months.push(d.slice(0, 7));
+    d = addMonth(d);
+  }
+  return months;
+}
+
 // Combined and filtered list
 const combinedList = computed<ListItem[]>(() => {
   const items: ListItem[] = [];
+  const sel = selectedMonth.value;
+  const currentMonth = currentMonthYYYYMM();
 
-  // Add payments
+  // Add payments (real rows: due in this month)
   for (const p of allPayments.value) {
-    // Filter by month if selected
-    if (selectedMonth.value !== 'all' && !p.due_date.startsWith(selectedMonth.value)) {
-      continue;
-    }
+    if (sel !== 'all' && !p.due_date.startsWith(sel)) continue;
     items.push({ ...p, type: 'payment' });
   }
 
-  // Add history entries (only when filtering by month, not "all")
-  if (selectedMonth.value !== 'all') {
-    // Find the last history entry per payment_id (by paid_date)
+  // Add history entries (only when filtering by month)
+  if (sel !== 'all') {
     const lastHistoryByPayment = new Map<string, { id: string; paid_date: string }>();
     for (const h of allHistory.value) {
       const existing = lastHistoryByPayment.get(h.payment_id);
@@ -506,9 +560,8 @@ const combinedList = computed<ListItem[]>(() => {
         lastHistoryByPayment.set(h.payment_id, { id: h.id, paid_date: h.paid_date });
       }
     }
-
     for (const h of allHistory.value) {
-      if (!h.due_date.startsWith(selectedMonth.value)) continue;
+      if (!h.due_date.startsWith(sel)) continue;
       items.push({
         type: 'history',
         id: h.id,
@@ -520,11 +573,50 @@ const combinedList = computed<ListItem[]>(() => {
         isLast: lastHistoryByPayment.get(h.payment_id)?.id === h.id,
       });
     }
+
+    // Add upcoming rows for current/future months (informational only)
+    if (sel >= currentMonth) {
+      for (const p of allPayments.value) {
+        if (p.is_paid || p.is_paused) continue;
+        const period = p.recurrence_period;
+        const hasRealRow = p.due_date.startsWith(sel);
+
+        if (period === 'monthly') {
+          if (!hasRealRow) {
+            items.push({
+              type: 'upcoming',
+              id: `upcoming-${p.id}-${sel}`,
+              paymentId: p.id,
+              name: p.name,
+              amount: p.amount,
+              due_date: getDueDateInMonth(sel, p.due_date),
+              description: p.description,
+              recurrence_period: p.recurrence_period,
+              remaining_occurrences: p.remaining_occurrences,
+            });
+          }
+        } else if (period === 'limited') {
+          const months = getLimitedMonths(p);
+          if (months.includes(sel) && !hasRealRow) {
+            items.push({
+              type: 'upcoming',
+              id: `upcoming-${p.id}-${sel}`,
+              paymentId: p.id,
+              name: p.name,
+              amount: p.amount,
+              due_date: getDueDateInMonth(sel, p.due_date),
+              description: p.description,
+              recurrence_period: p.recurrence_period,
+              remaining_occurrences: p.remaining_occurrences,
+            });
+          }
+        }
+        // one-time: no upcoming rows, only real row in due month
+      }
+    }
   }
 
-  // Sort by due_date
   items.sort((a, b) => a.due_date.localeCompare(b.due_date));
-
   return items;
 });
 
@@ -538,13 +630,15 @@ const summary = computed(() => {
     return { type: 'all' as const, total };
   }
 
-  // For specific month, show unpaid + paid amounts
+  // For specific month, show unpaid + paid amounts (unpaid includes real + upcoming for that month)
+  const sel = selectedMonth.value;
+  const currentMonth = currentMonthYYYYMM();
   let unpaidTotal = 0;
   let paidTotal = 0;
 
-  // Count payments for this month
+  // Count payments for this month (real rows)
   for (const p of allPayments.value) {
-    if (!p.due_date.startsWith(selectedMonth.value)) continue;
+    if (!p.due_date.startsWith(sel)) continue;
     if (p.is_paused) continue;
     if (p.is_paid) {
       paidTotal += p.amount;
@@ -555,8 +649,25 @@ const summary = computed(() => {
 
   // Count history entries for this month
   for (const h of allHistory.value) {
-    if (!h.due_date.startsWith(selectedMonth.value)) continue;
+    if (!h.due_date.startsWith(sel)) continue;
     paidTotal += h.amount;
+  }
+
+  // Include upcoming amounts for this month in unpaid total (same logic as combinedList)
+  if (sel >= currentMonth) {
+    for (const p of allPayments.value) {
+      if (p.is_paid || p.is_paused) continue;
+      const hasRealRow = p.due_date.startsWith(sel);
+      if (p.recurrence_period === 'monthly' && !hasRealRow) {
+        unpaidTotal += p.amount;
+      } else if (
+        p.recurrence_period === 'limited' &&
+        getLimitedMonths(p).includes(sel) &&
+        !hasRealRow
+      ) {
+        unpaidTotal += p.amount;
+      }
+    }
   }
 
   return { type: 'month' as const, unpaidTotal, paidTotal };
@@ -572,6 +683,9 @@ function isOverdue(dueDateStr: string): boolean {
 function getItemClass(item: ListItem): string {
   if (item.type === 'history') {
     return 'border border-gray-200/80 bg-gray-50 opacity-75 dark:border-gray-700 dark:bg-gray-800/80';
+  }
+  if (item.type === 'upcoming') {
+    return 'border border-sky-200/80 bg-sky-50/50 opacity-60 dark:border-sky-800/50 dark:bg-sky-900/10';
   }
   if (item.is_paused) {
     return 'border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 opacity-60';

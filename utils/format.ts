@@ -40,3 +40,10 @@ export function subtractMonth(dateStr: string): string {
   }
   return d.toISOString().slice(0, 10);
 }
+
+/** Same calendar day in a given month (YYYY-MM). Day is capped to last day of month (e.g. 31 in Feb → 28/29). */
+export function getDueDateInMonth(monthYYYYMM: string, dueDateStr: string): string {
+  const [y, m] = monthYYYYMM.split('-').map(Number);
+  const day = Math.min(new Date(dueDateStr + 'T12:00:00').getDate(), new Date(y, m, 0).getDate());
+  return `${y}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
