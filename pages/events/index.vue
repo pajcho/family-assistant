@@ -2,13 +2,25 @@
   <div>
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Događaji</h1>
-      <Button @click="openAdd">
-        <PlusIcon class="mr-2 h-5 w-5" />
-        Dodaj događaj
-      </Button>
+      <div class="flex flex-wrap items-center gap-2">
+        <label
+          class="flex cursor-pointer items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+        >
+          <input
+            v-model="hideCompleted"
+            type="checkbox"
+            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-500"
+          />
+          Sakrij završene
+        </label>
+        <Button @click="openAdd">
+          <PlusIcon class="mr-2 h-5 w-5" />
+          Dodaj događaj
+        </Button>
+      </div>
     </div>
 
-    <div class="mt-4 flex flex-wrap gap-4 sm:flex-row">
+    <div class="mt-4 flex flex-wrap items-center gap-4 sm:flex-row">
       <div class="flex items-center gap-2">
         <Label
           for="from"
@@ -53,7 +65,7 @@
       Učitavanje…
     </div>
     <div
-      v-else-if="events.length === 0"
+      v-else-if="filteredEvents.length === 0"
       class="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-center text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
     >
       Nema događaja za prikaz. Dodajte prvi događaj.
@@ -63,13 +75,26 @@
       class="mt-6 space-y-3"
     >
       <li
-        v-for="ev in events"
+        v-for="ev in filteredEvents"
         :key="ev.id"
-        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+        :class="[
+          'rounded-lg border p-4 shadow-sm dark:border-gray-700',
+          isEventEnded(ev)
+            ? 'border-gray-200/80 bg-gray-50 opacity-75 dark:bg-gray-800/80'
+            : 'border-gray-200 bg-white dark:bg-gray-800',
+        ]"
       >
         <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
           <div class="min-w-0 flex-1">
-            <p class="font-medium text-gray-900 dark:text-gray-100">{{ ev.name }}</p>
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="font-medium text-gray-900 dark:text-gray-100">{{ ev.name }}</p>
+              <span
+                v-if="isEventEnded(ev)"
+                class="rounded bg-gray-200 px-1.5 py-0.5 text-xs text-gray-600 dark:bg-gray-600 dark:text-gray-400"
+              >
+                Završeno
+              </span>
+            </div>
             <p class="text-sm text-gray-600 dark:text-gray-400">
               {{ formatDate(ev.date) }} · {{ formatTime(ev.start_time) }} –
               {{ formatTime(ev.end_time) }}
@@ -209,6 +234,7 @@ const { fetchEvents, createEvent, updateEvent, deleteEvent } = useEvents();
 
 const events = ref<Event[]>([]);
 const loading = ref(true);
+const hideCompleted = ref(true);
 const filterFrom = ref('');
 const filterTo = ref('');
 const dialogOpen = ref(false);
@@ -217,6 +243,28 @@ const editingEvent = ref<Event | null>(null);
 const eventToDelete = ref<Event | null>(null);
 const deleting = ref(false);
 const errorMessage = ref('');
+
+/** True if event has already ended (past date, or today but end_time has passed). */
+function isEventEnded(event: Event): boolean {
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const eventDateStart = new Date(event.date + 'T00:00:00');
+  if (eventDateStart < todayStart) return true;
+  if (eventDateStart > todayStart) return false;
+  const endTimeStr = event.end_time ?? '23:59';
+  const endDateTime = new Date(
+    event.date + 'T' + (endTimeStr.length === 5 ? endTimeStr + ':00' : endTimeStr),
+  );
+  return now >= endDateTime;
+}
+
+const filteredEvents = computed(() => {
+  if (hideCompleted.value) {
+    return events.value.filter((ev) => !isEventEnded(ev));
+  }
+  return [...events.value];
+});
 
 async function loadEvents(): Promise<void> {
   await fetchProfile();
