@@ -1,5 +1,5 @@
 <template>
-  <PullToRefresh :on-refresh="refreshData">
+  <PullToRefresh>
     <div>
       <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">
         {{ familyName ? `Porodica ${familyName}` : 'Kontrolna tabla' }}
