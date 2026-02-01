@@ -19,16 +19,24 @@ export function formatAmount(amount: number): string {
   return `${Number(amount).toLocaleString('sr-Latn-RS')} RSD`;
 }
 
-/** Add one month to YYYY-MM-DD string */
+/** Add one month to YYYY-MM-DD string. If the day doesn't exist in the next month (e.g. Jan 31 → Feb), returns last day of that month. */
 export function addMonth(dateStr: string): string {
   const d = new Date(dateStr + 'T12:00:00');
+  const dayBefore = d.getDate();
   d.setMonth(d.getMonth() + 1);
+  if (d.getDate() !== dayBefore) {
+    d.setDate(0); // last day of previous (target) month
+  }
   return d.toISOString().slice(0, 10);
 }
 
-/** Subtract one month from YYYY-MM-DD string */
+/** Subtract one month from YYYY-MM-DD string. If the day doesn't exist in the previous month, returns last day of that month. */
 export function subtractMonth(dateStr: string): string {
   const d = new Date(dateStr + 'T12:00:00');
+  const dayBefore = d.getDate();
   d.setMonth(d.getMonth() - 1);
+  if (d.getDate() !== dayBefore) {
+    d.setDate(0); // last day of current (target) month
+  }
   return d.toISOString().slice(0, 10);
 }
