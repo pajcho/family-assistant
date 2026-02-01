@@ -38,7 +38,7 @@
           />
           <NavLink
             to="/expenses"
-            label="Izdvajanja"
+            label="Planirani troškovi"
             :icon="ShoppingBagIcon"
           />
         </div>
@@ -86,7 +86,7 @@
       />
       <NavLink
         to="/expenses"
-        label="Izdvajanja"
+        label="Planirani troškovi"
         :icon="ShoppingBagIcon"
         class="shrink-0"
       />

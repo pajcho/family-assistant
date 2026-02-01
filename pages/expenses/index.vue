@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Planirana izdvajanja</h1>
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Planirani troškovi</h1>
       <div class="flex flex-wrap items-center gap-2">
         <label class="flex items-center gap-2 text-sm text-gray-600">
           <input
@@ -9,11 +9,11 @@
             type="checkbox"
             class="rounded border-gray-300"
           />
-          Sakrij plaćena
+          Sakrij plaćene
         </label>
         <Button @click="openAdd">
           <PlusIcon class="mr-2 h-5 w-5" />
-          Dodaj izdvajanje
+          Dodaj trošak
         </Button>
       </div>
     </div>
@@ -36,7 +36,7 @@
       v-else-if="expenses.length === 0"
       class="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-center text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
     >
-      Nema planiranih izdvajanja za prikaz.
+      Nema planiranih troškova za prikaz.
     </div>
     <ul
       v-else
@@ -139,7 +139,7 @@
           id="expense-dialog-title"
           class="text-lg font-semibold"
         >
-          {{ editingExpense ? 'Izmeni izdvajanje' : 'Dodaj izdvajanje' }}
+          {{ editingExpense ? 'Izmeni trošak' : 'Dodaj trošak' }}
         </h2>
       </DialogHeader>
       <DialogContent>
@@ -160,7 +160,7 @@
           id="delete-expense-title"
           class="text-lg font-semibold"
         >
-          Obriši izdvajanje
+          Obriši trošak
         </h2>
       </DialogHeader>
       <DialogContent>

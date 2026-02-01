@@ -134,7 +134,7 @@
           id="expense-dialog-title"
           class="text-lg font-semibold"
         >
-          {{ editingExpense ? 'Izmeni izdvajanje' : 'Dodaj izdvajanje' }}
+          {{ editingExpense ? 'Izmeni trošak' : 'Dodaj trošak' }}
         </h2>
       </DialogHeader>
       <DialogContent>
@@ -336,13 +336,13 @@ async function onExpenseSubmit(payload: {
   if (editingExpense.value) {
     const { error } = await updateExpense(editingExpense.value.id, payload);
     if (error) {
-      expenseError.value = error.message || 'Greška pri ažuriranju izdvajanja';
+      expenseError.value = error.message || 'Greška pri ažuriranju troška';
       return;
     }
   } else {
     const { error } = await createExpense(payload);
     if (error) {
-      expenseError.value = error.message || 'Greška pri kreiranju izdvajanja';
+      expenseError.value = error.message || 'Greška pri kreiranju troška';
       return;
     }
   }

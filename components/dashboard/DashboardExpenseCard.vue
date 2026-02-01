@@ -1,9 +1,9 @@
 <template>
   <DashboardCard
     :icon="ShoppingBagIcon"
-    title="Neplaćena izdvajanja"
-    empty-message="Nema neplaćenih izdvajanja"
-    add-label="Dodaj izdvajanje"
+    title="Planirani troškovi"
+    empty-message="Nema planiranih troškova"
+    add-label="Dodaj trošak"
     view-all-link="/expenses"
     :has-items="unpaidExpenses.length > 0"
     variant="purple"
@@ -37,7 +37,7 @@
         id="expense-detail-title"
         class="text-lg font-semibold"
       >
-        Detalji izdvajanja
+        Detalji troška
       </h2>
     </DialogHeader>
     <DialogContent v-if="selectedExpense">
