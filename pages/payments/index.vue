@@ -46,7 +46,15 @@
       >
         <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
           <div class="min-w-0 flex-1">
-            <p class="font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
+              <span
+                v-if="item.type === 'history' || item.is_paid"
+                class="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400"
+              >
+                Plaćeno
+              </span>
+            </div>
             <p class="text-sm text-gray-600 dark:text-gray-400">
               {{ formatDate(item.due_date) }} · {{ formatAmount(item.amount) }}
             </p>
@@ -550,15 +558,15 @@ const summary = computed(() => {
 
 function getItemClass(item: ListItem): string {
   if (item.type === 'history') {
-    return 'border-l-4 border-l-emerald-500 border-gray-200 dark:border-gray-700 opacity-75';
+    return 'border border-gray-200/80 bg-gray-50 opacity-75 dark:border-gray-700 dark:bg-gray-800/80';
   }
   if (item.is_paused) {
-    return 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 opacity-60';
+    return 'border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 opacity-60';
   }
   if (item.is_paid) {
-    return 'border-gray-200 dark:border-gray-700 opacity-60';
+    return 'border border-gray-200/80 bg-gray-50 opacity-75 dark:border-gray-700 dark:bg-gray-800/80';
   }
-  return 'border-gray-200 dark:border-gray-700';
+  return 'border border-gray-200 dark:border-gray-700';
 }
 
 async function loadData(): Promise<void> {
