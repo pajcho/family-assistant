@@ -224,6 +224,7 @@ import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/
 import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import EventForm from '~/components/events/EventForm.vue';
 import { formatDate, formatTime } from '~/utils/format';
+import { isEventEnded } from '~/utils/event';
 import { useEvents } from '~/composables/useEvents';
 import { useProfile } from '~/composables/useProfile';
 
@@ -243,21 +244,6 @@ const editingEvent = ref<Event | null>(null);
 const eventToDelete = ref<Event | null>(null);
 const deleting = ref(false);
 const errorMessage = ref('');
-
-/** True if event has already ended (past date, or today but end_time has passed). */
-function isEventEnded(event: Event): boolean {
-  const now = new Date();
-  const todayStart = new Date(now);
-  todayStart.setHours(0, 0, 0, 0);
-  const eventDateStart = new Date(event.date + 'T00:00:00');
-  if (eventDateStart < todayStart) return true;
-  if (eventDateStart > todayStart) return false;
-  const endTimeStr = event.end_time ?? '23:59';
-  const endDateTime = new Date(
-    event.date + 'T' + (endTimeStr.length === 5 ? endTimeStr + ':00' : endTimeStr),
-  );
-  return now >= endDateTime;
-}
 
 const filteredEvents = computed(() => {
   if (hideCompleted.value) {

@@ -1,5 +1,5 @@
 import type { Payment, PaymentHistory, RecurrencePeriod } from '~/types/database';
-import { addMonth, subtractMonth } from '~/utils/format';
+import { addMonth, subtractMonth, dueDateInCurrentMonth, isDateBeforeToday } from '~/utils/date';
 
 export function usePayments() {
   const supabase = useSupabase();
@@ -195,25 +195,8 @@ export function usePayments() {
     const willUnpause = row.is_paused === true;
     const updates: { is_paused: boolean; due_date?: string } = { is_paused: !row.is_paused };
 
-    // When unpausing, check if due_date is in the past
-    if (willUnpause && row.due_date) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const dueDate = new Date(row.due_date + 'T00:00:00');
-
-      if (dueDate < today) {
-        // Move to the same day in current month
-        const day = dueDate.getDate();
-        const currentYear = today.getFullYear();
-        const currentMonth = today.getMonth();
-
-        // Handle edge case: if day doesn't exist in current month (e.g., 31st in February)
-        const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-        const newDay = Math.min(day, lastDayOfMonth);
-
-        const newDueDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(newDay).padStart(2, '0')}`;
-        updates.due_date = newDueDate;
-      }
+    if (willUnpause && row.due_date && isDateBeforeToday(row.due_date)) {
+      updates.due_date = dueDateInCurrentMonth(row.due_date);
     }
 
     const { error } = await supabase.from('payments').update(updates).eq('id', id);

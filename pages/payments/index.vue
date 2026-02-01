@@ -408,7 +408,14 @@ import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/
 import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import PaymentForm from '~/components/payments/PaymentForm.vue';
 import PaymentHistoryPopup from '~/components/payments/PaymentHistoryPopup.vue';
-import { formatDate, formatAmount, getDueDateInMonth, addMonth } from '~/utils/format';
+import { formatDate, formatAmount } from '~/utils/format';
+import {
+  isOverdue,
+  getDueDateInMonth,
+  addMonth,
+  currentMonthYYYYMM,
+  getLimitedMonths as getLimitedMonthsFromDate,
+} from '~/utils/date';
 import { usePayments } from '~/composables/usePayments';
 import { useProfile } from '~/composables/useProfile';
 
@@ -521,22 +528,8 @@ const paymentNameMap = computed(() => {
   return map;
 });
 
-// Current month YYYY-MM
-const currentMonthYYYYMM = (): string => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-};
-
-// For limited payment: list of YYYY-MM for next remaining_occurrences months (including due_date month)
 function getLimitedMonths(p: Payment): string[] {
-  const n = Math.max(0, p.remaining_occurrences ?? 0);
-  const months: string[] = [];
-  let d = p.due_date;
-  for (let i = 0; i < n; i++) {
-    months.push(d.slice(0, 7));
-    d = addMonth(d);
-  }
-  return months;
+  return getLimitedMonthsFromDate(p.due_date, Math.max(0, p.remaining_occurrences ?? 0));
 }
 
 // Combined and filtered list
@@ -672,13 +665,6 @@ const summary = computed(() => {
 
   return { type: 'month' as const, unpaidTotal, paidTotal };
 });
-
-function isOverdue(dueDateStr: string): boolean {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const due = new Date(dueDateStr + 'T00:00:00');
-  return due < today;
-}
 
 function getItemClass(item: ListItem): string {
   if (item.type === 'history') {

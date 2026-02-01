@@ -1,11 +1,5 @@
-/** Serbian date format DD.MM.YYYY */
-export function formatDate(date: Date | string): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}.${month}.${year}`;
-}
+/** Re-export date formatting and month helpers from date utils (backward compatibility). */
+export { formatDate, addMonth, subtractMonth, getDueDateInMonth } from '~/utils/date';
 
 /** 24-hour time HH:mm */
 export function formatTime(time: string): string {
@@ -17,33 +11,4 @@ export function formatTime(time: string): string {
 /** RSD amount with symbol */
 export function formatAmount(amount: number): string {
   return `${Number(amount).toLocaleString('sr-Latn-RS')} RSD`;
-}
-
-/** Add one month to YYYY-MM-DD string. If the day doesn't exist in the next month (e.g. Jan 31 → Feb), returns last day of that month. */
-export function addMonth(dateStr: string): string {
-  const d = new Date(dateStr + 'T12:00:00');
-  const dayBefore = d.getDate();
-  d.setMonth(d.getMonth() + 1);
-  if (d.getDate() !== dayBefore) {
-    d.setDate(0); // last day of previous (target) month
-  }
-  return d.toISOString().slice(0, 10);
-}
-
-/** Subtract one month from YYYY-MM-DD string. If the day doesn't exist in the previous month, returns last day of that month. */
-export function subtractMonth(dateStr: string): string {
-  const d = new Date(dateStr + 'T12:00:00');
-  const dayBefore = d.getDate();
-  d.setMonth(d.getMonth() - 1);
-  if (d.getDate() !== dayBefore) {
-    d.setDate(0); // last day of current (target) month
-  }
-  return d.toISOString().slice(0, 10);
-}
-
-/** Same calendar day in a given month (YYYY-MM). Day is capped to last day of month (e.g. 31 in Feb → 28/29). */
-export function getDueDateInMonth(monthYYYYMM: string, dueDateStr: string): string {
-  const [y, m] = monthYYYYMM.split('-').map(Number);
-  const day = Math.min(new Date(dueDateStr + 'T12:00:00').getDate(), new Date(y, m, 0).getDate());
-  return `${y}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }

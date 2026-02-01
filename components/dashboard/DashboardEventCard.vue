@@ -127,7 +127,8 @@ import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
 import DashboardCard from '~/components/dashboard/DashboardCard.vue';
 import { formatDate, formatTime } from '~/utils/format';
-
+import { isDateInRange, startOfToday, addDays, daysFromToday } from '~/utils/date';
+import { isEventEnded } from '~/utils/event';
 interface Props {
   events: Event[];
 }
@@ -145,42 +146,23 @@ function handleEdit(): void {
     emit('edit', selectedEvent.value);
   }
 }
+
 // Filter events within 14 days and sort by date
 const upcomingEvents = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const in14 = new Date(today);
-  in14.setDate(in14.getDate() + 14);
+  const today = startOfToday();
+  const in14 = addDays(today, 14);
 
   return props.events
-    .filter((e) => {
-      const eventDate = new Date(e.date + 'T00:00:00');
-      return eventDate >= today && eventDate <= in14;
-    })
-    .toSorted((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
+    .filter((e) => isDateInRange(e.date, today, in14))
+    .slice()
+    .toSorted(
+      (a, b) =>
+        a.date.localeCompare(b.date) || (a.start_time ?? '').localeCompare(b.start_time ?? ''),
+    );
 });
 
-/** True if event has already ended (past date, or today but end_time has passed). */
-function isEventEnded(event: Event): boolean {
-  const now = new Date();
-  const todayStart = new Date(now);
-  todayStart.setHours(0, 0, 0, 0);
-  const eventDateStart = new Date(event.date + 'T00:00:00');
-  if (eventDateStart < todayStart) return true;
-  if (eventDateStart > todayStart) return false;
-  const endTimeStr = event.end_time ?? '23:59';
-  const endDateTime = new Date(
-    event.date + 'T' + (endTimeStr.length === 5 ? endTimeStr + ':00' : endTimeStr),
-  );
-  return now >= endDateTime;
-}
-
 function eventDateLabel(dateStr: string): string {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const eventDate = new Date(dateStr + 'T00:00:00');
-  const diff = Math.round((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
+  const diff = daysFromToday(dateStr);
   if (diff === 0) return 'danas';
   if (diff === 1) return 'sutra';
   return `za ${diff} dana`;

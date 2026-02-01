@@ -165,6 +165,7 @@ import DashboardCard from '~/components/dashboard/DashboardCard.vue';
 import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
 import PaymentHistoryPopup from '~/components/payments/PaymentHistoryPopup.vue';
 import { formatDate, formatAmount } from '~/utils/format';
+import { isOverdue, isDateInRange, startOfToday, addDays } from '~/utils/date';
 import { usePayments } from '~/composables/usePayments';
 
 interface Props {
@@ -212,37 +213,18 @@ async function handleMarkAsPaid(): Promise<void> {
   }
 }
 
-const todayAtMidnight = (): Date => {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
-
-function isOverdue(dueDateStr: string): boolean {
-  const due = new Date(dueDateStr + 'T00:00:00');
-  const today = todayAtMidnight();
-  return due < today;
-}
-
 // Unpaid, non-paused: overdue (due_date < today) + upcoming (today <= due_date <= today+7), sorted: overdue first, then upcoming by due_date
 const duePayments = computed(() => {
-  const today = todayAtMidnight();
-  const in7 = new Date(today);
-  in7.setDate(in7.getDate() + 7);
+  const today = startOfToday();
+  const in7 = addDays(today, 7);
 
   const unpaid = props.payments.filter((p) => !p.is_paid && !p.is_paused);
   const overdue = unpaid
-    .filter((p) => {
-      const due = new Date(p.due_date + 'T00:00:00');
-      return due < today;
-    })
+    .filter((p) => isOverdue(p.due_date))
     .slice()
     .toSorted((a, b) => a.due_date.localeCompare(b.due_date));
   const upcoming = unpaid
-    .filter((p) => {
-      const due = new Date(p.due_date + 'T00:00:00');
-      return due >= today && due <= in7;
-    })
+    .filter((p) => isDateInRange(p.due_date, today, in7))
     .slice()
     .toSorted((a, b) => a.due_date.localeCompare(b.due_date));
 

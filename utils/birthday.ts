@@ -1,30 +1,39 @@
-/** Current age from birth_date (YYYY-MM-DD) */
+import {
+  parseISO,
+  startOfDay,
+  differenceInYears,
+  differenceInDays,
+  getMonth,
+  getDate,
+  isBefore,
+} from 'date-fns';
+import { startOfToday } from '~/utils/date';
+
+/** Current age from birth_date (YYYY-MM-DD). */
 export function currentAge(birthDate: string): number {
-  const today = new Date();
-  const birth = new Date(birthDate + 'T12:00:00');
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-  return age;
+  const today = startOfToday();
+  const birth = startOfDay(parseISO(birthDate));
+  return differenceInYears(today, birth);
 }
 
-/** Next birthday date (this year or next) */
+/** Next birthday date (this year or next). */
 export function nextBirthdayDate(birthDate: string): Date {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const [, month, day] = birthDate.split('-').map(Number);
-  let next = new Date(today.getFullYear(), month - 1, day);
-  if (next < today) next = new Date(today.getFullYear() + 1, month - 1, day);
+  const today = startOfToday();
+  const birth = parseISO(birthDate);
+  const month = getMonth(birth);
+  const day = getDate(birth);
+  let next = startOfDay(new Date(today.getFullYear(), month, day));
+  if (isBefore(next, today)) {
+    next = startOfDay(new Date(today.getFullYear() + 1, month, day));
+  }
   return next;
 }
 
-/** Days until next birthday */
+/** Days until next birthday. */
 export function daysUntilBirthday(birthDate: string): number {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = startOfToday();
   const next = nextBirthdayDate(birthDate);
-  const diff = next.getTime() - today.getTime();
-  return Math.round(diff / (1000 * 60 * 60 * 24));
+  return differenceInDays(next, today);
 }
 
 /** Display text: "[Name] puni [age] godina za [X] dana" */
