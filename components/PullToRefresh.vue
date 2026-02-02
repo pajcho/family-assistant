@@ -20,7 +20,7 @@ onMounted(() => {
       window.location.reload();
     },
     instructionsPullToRefresh: 'Povuci za osvežavanje',
-    instructionsReleaseToRefresh: 'Otpušti',
+    instructionsReleaseToRefresh: 'Otpusti',
     instructionsRefreshing: 'Osvežavanje…',
   });
 });

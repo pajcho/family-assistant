@@ -24,6 +24,14 @@
   .dark input[type='datetime-local']::-webkit-calendar-picker-indicator {
     filter: invert(1);
   }
+
+  /* Pull-to-refresh (pulltorefreshjs): lighter text in dark mode */
+  .dark .ptr,
+  .dark .ptr--text,
+  .dark .ptr--instruction,
+  .dark .ptr--icon {
+    color: rgb(209 213 219) !important;
+  }
 }
 
 @layer utilities {
