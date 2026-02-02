@@ -223,7 +223,7 @@ import { Label } from '~/components/ui/label';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
 import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import EventForm from '~/components/events/EventForm.vue';
-import { formatDate, formatTime } from '~/utils/format';
+import { formatDate, formatTime } from '~/utils/date';
 import { isEventEnded } from '~/utils/event';
 import { useEvents } from '~/composables/useEvents';
 import { useProfile } from '~/composables/useProfile';

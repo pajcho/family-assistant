@@ -104,8 +104,14 @@ import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
 import DashboardCard from '~/components/dashboard/DashboardCard.vue';
 import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
-import { formatDate, formatTime } from '~/utils/format';
-import { isDateInRange, startOfToday, addDays, daysFromToday } from '~/utils/date';
+import {
+  formatDate,
+  formatTime,
+  isDateInRange,
+  startOfToday,
+  addDays,
+  daysFromToday,
+} from '~/utils/date';
 import { isEventEnded } from '~/utils/event';
 interface Props {
   events: Event[];

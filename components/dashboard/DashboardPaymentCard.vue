@@ -165,8 +165,8 @@ import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/
 import DashboardCard from '~/components/dashboard/DashboardCard.vue';
 import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
 import PaymentHistoryPopup from '~/components/payments/PaymentHistoryPopup.vue';
-import { formatDate, formatAmount } from '~/utils/format';
-import { isOverdue, isDateInRange, startOfToday, addDays } from '~/utils/date';
+import { formatAmount } from '~/utils/format';
+import { formatDate, isOverdue, isDateInRange, startOfToday, addDays } from '~/utils/date';
 import { usePayments } from '~/composables/usePayments';
 
 interface Props {

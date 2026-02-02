@@ -117,6 +117,13 @@ export function formatDate(date: Date | string): string {
   return format(d, 'dd.MM.yyyy', { locale: srLocale });
 }
 
+/** 24-hour time HH:mm */
+export function formatTime(time: string): string {
+  if (!time) return '';
+  const [h, m] = time.split(':');
+  return `${h.padStart(2, '0')}:${(m ?? '00').padStart(2, '0')}`;
+}
+
 /** Days from first date to second (can be negative). */
 export function daysBetween(from: Date, to: Date): number {
   return differenceInDays(startOfDay(to), startOfDay(from));

@@ -113,7 +113,8 @@ import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
 import DashboardCard from '~/components/dashboard/DashboardCard.vue';
 import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
-import { formatDate, formatAmount } from '~/utils/format';
+import { formatDate } from '~/utils/date';
+import { formatAmount } from '~/utils/format';
 
 interface Props {
   expenses: Expense[];

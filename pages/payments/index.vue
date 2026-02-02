@@ -408,8 +408,9 @@ import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/
 import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import PaymentForm from '~/components/payments/PaymentForm.vue';
 import PaymentHistoryPopup from '~/components/payments/PaymentHistoryPopup.vue';
-import { formatDate, formatAmount } from '~/utils/format';
+import { formatAmount } from '~/utils/format';
 import {
+  formatDate,
   isOverdue,
   getDueDateInMonth,
   currentMonthYYYYMM,

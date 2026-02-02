@@ -195,7 +195,8 @@ import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
 import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import ExpenseForm from '~/components/expenses/ExpenseForm.vue';
-import { formatDate, formatAmount } from '~/utils/format';
+import { formatDate } from '~/utils/date';
+import { formatAmount } from '~/utils/format';
 import { useExpenses } from '~/composables/useExpenses';
 import { useProfile } from '~/composables/useProfile';
 

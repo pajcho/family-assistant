@@ -110,7 +110,7 @@ import {
   birthdayDisplayText,
   nextBirthdayDate,
 } from '~/utils/birthday';
-import { formatDate } from '~/utils/format';
+import { formatDate } from '~/utils/date';
 
 interface Props {
   birthdays: Birthday[];
