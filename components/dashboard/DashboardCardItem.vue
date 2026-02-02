@@ -2,11 +2,20 @@
   <button
     type="button"
     class="flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors"
-    :class="variantClasses"
+    :class="[variantClasses, { 'opacity-50': completed }]"
     @click="$emit('click')"
   >
-    <span class="flex min-w-0 flex-1 items-center gap-2">
+    <span
+      class="flex min-w-0 flex-1 items-center gap-2"
+      :class="{ 'opacity-50': completed }"
+    >
       <span class="truncate font-medium text-gray-900 dark:text-gray-100">{{ label }}</span>
+      <span
+        v-if="description"
+        class="ml-1.5 text-xs text-gray-500 dark:text-gray-400"
+      >
+        {{ description }}
+      </span>
       <span
         v-if="badgeIcon"
         class="shrink-0"
@@ -26,7 +35,7 @@
         {{ badge }}
       </span>
     </span>
-    <span :class="valueClass">{{ value }}</span>
+    <span :class="[valueClass, { 'opacity-50': completed }]">{{ value }}</span>
   </button>
 </template>
 
@@ -36,12 +45,14 @@ import type { Component } from 'vue';
 interface Props {
   label: string;
   value: string;
+  description?: string;
   variant?: 'blue' | 'amber' | 'emerald' | 'purple' | 'red';
   badge?: string;
   /** Icon component (e.g. for overdue indicator). Shown instead of badge when set. */
   badgeIcon?: Component;
   /** Optional title/tooltip for badgeIcon. */
   badgeIconTitle?: string;
+  completed?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -49,18 +60,20 @@ const props = withDefaults(defineProps<Props>(), {
   badge: undefined,
   badgeIcon: undefined,
   badgeIconTitle: undefined,
+  completed: false,
+  description: undefined,
 });
 
 defineEmits<{ click: [] }>();
 
 const variantClasses = computed(() => {
   const map = {
-    blue: 'bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50',
-    amber: 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50',
+    blue: 'bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/10 dark:hover:bg-blue-900/30',
+    amber: 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/10 dark:hover:bg-amber-900/30',
     emerald:
-      'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50',
-    purple: 'bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50',
-    red: 'bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:hover:bg-red-900/50',
+      'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/10 dark:hover:bg-emerald-900/30',
+    purple: 'bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/10 dark:hover:bg-purple-900/30',
+    red: 'bg-red-50 hover:bg-red-100 dark:bg-red-900/10 dark:hover:bg-red-900/30',
   };
   return map[props.variant];
 });

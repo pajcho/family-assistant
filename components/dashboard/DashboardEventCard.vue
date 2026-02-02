@@ -10,39 +10,16 @@
     @add="$emit('add')"
   >
     <template #items>
-      <button
-        v-for="e in upcomingEvents.slice(0, 3)"
-        :key="e.id"
-        type="button"
-        :class="[
-          'flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors',
-          'bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50',
-          isEventEnded(e) && 'opacity-70',
-        ]"
-        @click="openDetail(e)"
-      >
-        <span
-          class="min-w-0 flex-1"
-          :class="{ 'opacity-50': isEventEnded(e) }"
-        >
-          <span class="font-medium text-gray-900 dark:text-gray-100">{{ e.name }}</span>
-          <span class="ml-1.5 text-xs text-gray-500 dark:text-gray-400">
-            {{ formatTime(e.start_time) }}–{{ formatTime(e.end_time) }}
-          </span>
-        </span>
-        <span
-          class="shrink-0 text-blue-700 dark:text-blue-400"
-          :class="{ 'opacity-50': isEventEnded(e) }"
-        >
-          {{ eventDateLabel(e.date) }}
-        </span>
-      </button>
-      <p
-        v-if="upcomingEvents.length > 3"
-        class="text-xs text-gray-500 dark:text-gray-400"
-      >
-        + još {{ upcomingEvents.length - 3 }}
-      </p>
+      <DashboardCardItem
+        v-for="event in upcomingEvents"
+        :key="event.id"
+        :label="event.name"
+        :value="eventDateLabel(event.date)"
+        variant="blue"
+        @click="openDetail(event)"
+        :completed="isEventEnded(event)"
+        :description="formatTime(event.start_time) + '-' + formatTime(event.end_time)"
+      />
     </template>
   </DashboardCard>
 
@@ -126,6 +103,7 @@ import type { Event } from '~/types/database';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
 import DashboardCard from '~/components/dashboard/DashboardCard.vue';
+import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
 import { formatDate, formatTime } from '~/utils/format';
 import { isDateInRange, startOfToday, addDays, daysFromToday } from '~/utils/date';
 import { isEventEnded } from '~/utils/event';

@@ -141,7 +141,7 @@ const allSortedBirthdays = computed(() => {
 const displayBirthdays = computed(() => {
   const sorted = allSortedBirthdays.value;
   if (sorted.length === 0) return [];
-  if (sorted.length <= 3) return sorted;
+  if (sorted.length <= 3 || !sorted[2]) return sorted;
   const third = sorted[2];
   const thirdNextDate = nextBirthdayDate(third.birth_date).getTime();
   return sorted.filter((b) => nextBirthdayDate(b.birth_date).getTime() <= thirdNextDate);
