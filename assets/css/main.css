@@ -16,11 +16,33 @@
     @apply transition-colors duration-200;
   }
 
-  /* Dark mode styling for native date/time picker icons */
+  /* Date/time inputs: match default input size on mobile (browsers often enlarge them) */
+  input[type='date'],
+  input[type='time'],
+  input[type='datetime-local'] {
+    min-height: 2.5rem;
+    height: 2.5rem;
+    max-height: 2.5rem;
+    font-size: 0.875rem;
+    padding-inline-end: 2rem;
+  }
+
+  /* Smaller calendar/clock icon so the field doesn’t look wider than other inputs */
+  input[type='date']::-webkit-calendar-picker-indicator,
+  input[type='time']::-webkit-calendar-picker-indicator,
+  input[type='datetime-local']::-webkit-calendar-picker-indicator {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    opacity: 0.6;
+  }
+
+  /* Dark mode: invert icon so it stays visible */
   .dark input[type='date']::-webkit-calendar-picker-indicator,
   .dark input[type='time']::-webkit-calendar-picker-indicator,
   .dark input[type='datetime-local']::-webkit-calendar-picker-indicator {
     filter: invert(1);
+    opacity: 0.7;
   }
 
   /* Pull-to-refresh (pulltorefreshjs): lighter text in dark mode */
