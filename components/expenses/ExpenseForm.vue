@@ -76,7 +76,7 @@ const isEdit = computed(() => !!props.expense?.id);
 const form = reactive({
   name: props.expense?.name ?? '',
   description: props.expense?.description ?? '',
-  amount: props.expense?.amount ?? 0,
+  amount: props.expense?.amount ?? '',
 });
 
 watch(
@@ -94,12 +94,13 @@ watch(
 const saving = ref(false);
 
 function onSubmit(): void {
-  if (!form.name.trim() || form.amount <= 0) return;
+  const amountNum = Number(form.amount);
+  if (!form.name.trim() || !(amountNum > 0)) return;
   saving.value = true;
   emit('submit', {
     name: form.name.trim(),
     description: form.description.trim() || undefined,
-    amount: Number(form.amount),
+    amount: amountNum,
   });
   saving.value = false;
 }

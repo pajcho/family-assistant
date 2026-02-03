@@ -166,7 +166,7 @@ const isEdit = computed(() => !!props.payment?.id);
 const form = reactive({
   name: props.payment?.name ?? '',
   description: props.payment?.description ?? '',
-  amount: props.payment?.amount ?? 0,
+  amount: props.payment?.amount ?? '',
   due_date: props.payment?.due_date ?? '',
   recurrence_period: (props.payment?.recurrence_period ?? 'one-time') as
     | RecurrencePeriod
@@ -196,13 +196,14 @@ watch(
 const saving = ref(false);
 
 function onSubmit(): void {
-  if (!form.name.trim() || !form.due_date || form.amount <= 0) return;
+  const amountNum = Number(form.amount);
+  if (!form.name.trim() || !form.due_date || !(amountNum > 0)) return;
   const isRecurring = form.recurrence_period !== 'one-time';
   saving.value = true;
   emit('submit', {
     name: form.name.trim(),
     description: form.description.trim() || undefined,
-    amount: Number(form.amount),
+    amount: amountNum,
     due_date: form.due_date,
     is_recurring: isRecurring,
     recurrence_period: form.recurrence_period === 'one-time' ? 'one-time' : form.recurrence_period,
