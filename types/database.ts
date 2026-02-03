@@ -20,8 +20,8 @@ export interface Event {
   name: string;
   description: string | null;
   date: string;
-  start_time: string;
-  end_time: string;
+  start_time: string | null;
+  end_time: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;

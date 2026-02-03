@@ -96,8 +96,7 @@
               </span>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400">
-              {{ formatDate(ev.date) }} · {{ formatTime(ev.start_time) }} –
-              {{ formatTime(ev.end_time) }}
+              {{ formatDate(ev.date) }} · {{ formatEventTimeRange(ev) }}
             </p>
             <p
               v-if="ev.description"
@@ -223,8 +222,8 @@ import { Label } from '~/components/ui/label';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
 import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import EventForm from '~/components/events/EventForm.vue';
-import { formatDate, formatTime } from '~/utils/date';
-import { isEventEnded } from '~/utils/event';
+import { formatDate } from '~/utils/date';
+import { isEventEnded, formatEventTimeRange } from '~/utils/event';
 import { useEvents } from '~/composables/useEvents';
 import { useProfile } from '~/composables/useProfile';
 

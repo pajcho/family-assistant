@@ -17,15 +17,26 @@ export function useEvents() {
     if (to) q = q.lte('date', to);
     const { data, error } = await q;
     if (error) return [];
-    return (data as Event[]) ?? [];
+    const list = (data as Event[]) ?? [];
+    // All-day events (null start_time) first per day, then by start_time
+    return list.toSorted((a, b) => {
+      const d = a.date.localeCompare(b.date);
+      if (d !== 0) return d;
+      const aNull = a.start_time == null;
+      const bNull = b.start_time == null;
+      if (aNull && !bNull) return -1;
+      if (!aNull && bNull) return 1;
+      if (aNull && bNull) return 0;
+      return (a.start_time ?? '').localeCompare(b.start_time ?? '');
+    });
   }
 
   async function createEvent(payload: {
     name: string;
     description?: string;
     date: string;
-    start_time: string;
-    end_time: string;
+    start_time?: string | null;
+    end_time?: string | null;
     notes?: string;
   }): Promise<{ data: Event | null; error: Error | null }> {
     const fid = familyId.value;

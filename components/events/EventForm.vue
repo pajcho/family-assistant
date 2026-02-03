@@ -20,34 +20,49 @@
         placeholder="detalji događaja"
       />
     </div>
-    <div class="grid grid-cols-2 gap-4">
+    <div class="space-y-2">
+      <Label for="date">Datum *</Label>
+      <Input
+        id="date"
+        v-model="form.date"
+        type="date"
+        required
+      />
+    </div>
+    <div class="flex items-center gap-2">
+      <input
+        id="all_day"
+        v-model="form.allDay"
+        type="checkbox"
+        class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-500"
+      />
+      <Label
+        for="all_day"
+        class="cursor-pointer font-normal"
+      >
+        Ceo dan
+      </Label>
+    </div>
+    <div
+      v-if="!form.allDay"
+      class="grid grid-cols-2 gap-4"
+    >
       <div class="space-y-2">
-        <Label for="date">Datum *</Label>
-        <Input
-          id="date"
-          v-model="form.date"
-          type="date"
-          required
-        />
-      </div>
-      <div class="space-y-2">
-        <Label for="start_time">Vreme *</Label>
+        <Label for="start_time">Početak (opciono)</Label>
         <Input
           id="start_time"
           v-model="form.start_time"
           type="time"
-          required
         />
       </div>
-    </div>
-    <div class="space-y-2">
-      <Label for="end_time">Završetak *</Label>
-      <Input
-        id="end_time"
-        v-model="form.end_time"
-        type="time"
-        required
-      />
+      <div class="space-y-2">
+        <Label for="end_time">Završetak (opciono)</Label>
+        <Input
+          id="end_time"
+          v-model="form.end_time"
+          type="time"
+        />
+      </div>
     </div>
     <div class="space-y-2">
       <Label for="notes">Napomene (poklon, itd.)</Label>
@@ -97,8 +112,9 @@ const form = reactive({
   name: props.event?.name ?? '',
   description: props.event?.description ?? '',
   date: props.event?.date ?? '',
-  start_time: props.event?.start_time ?? '18:00',
-  end_time: props.event?.end_time ?? '20:00',
+  allDay: !props.event ? false : props.event.start_time == null && props.event.end_time == null,
+  start_time: props.event?.start_time ?? '',
+  end_time: props.event?.end_time ?? '',
   notes: props.event?.notes ?? '',
 });
 
@@ -109,8 +125,9 @@ watch(
       form.name = e.name;
       form.description = e.description ?? '';
       form.date = e.date;
-      form.start_time = e.start_time;
-      form.end_time = e.end_time;
+      form.allDay = e.start_time == null && e.end_time == null;
+      form.start_time = e.start_time ?? '';
+      form.end_time = e.end_time ?? '';
       form.notes = e.notes ?? '';
     }
   },
@@ -120,14 +137,16 @@ watch(
 const saving = ref(false);
 
 function onSubmit(): void {
-  if (!form.name.trim() || !form.date || !form.start_time || !form.end_time) return;
+  if (!form.name.trim() || !form.date) return;
   saving.value = true;
+  const startTime = form.start_time.trim();
+  const endTime = form.end_time.trim();
   emit('submit', {
     name: form.name.trim(),
     description: form.description.trim() || undefined,
     date: form.date,
-    start_time: form.start_time,
-    end_time: form.end_time,
+    start_time: form.allDay ? null : startTime || null,
+    end_time: form.allDay ? null : endTime || null,
     notes: form.notes.trim() || undefined,
   });
   saving.value = false;

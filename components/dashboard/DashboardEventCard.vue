@@ -18,7 +18,7 @@
         variant="blue"
         @click="openDetail(event)"
         :completed="isEventEnded(event)"
-        :description="formatTime(event.start_time) + '-' + formatTime(event.end_time)"
+        :description="formatEventTimeRange(event)"
       />
     </template>
   </DashboardCard>
@@ -59,8 +59,7 @@
             <div class="flex justify-between">
               <dt class="text-gray-500 dark:text-gray-400">Vreme:</dt>
               <dd class="font-medium text-gray-900 dark:text-gray-100">
-                {{ formatTime(selectedEvent.start_time) }} –
-                {{ formatTime(selectedEvent.end_time) }}
+                {{ formatEventTimeRange(selectedEvent) }}
               </dd>
             </div>
             <div
@@ -104,15 +103,8 @@ import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
 import DashboardCard from '~/components/dashboard/DashboardCard.vue';
 import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
-import {
-  formatDate,
-  formatTime,
-  isDateInRange,
-  startOfToday,
-  addDays,
-  daysFromToday,
-} from '~/utils/date';
-import { isEventEnded } from '~/utils/event';
+import { formatDate, isDateInRange, startOfToday, addDays, daysFromToday } from '~/utils/date';
+import { isEventEnded, formatEventTimeRange } from '~/utils/event';
 interface Props {
   events: Event[];
 }
