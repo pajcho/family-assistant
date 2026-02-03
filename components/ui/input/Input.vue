@@ -6,6 +6,7 @@
     :disabled="disabled"
     v-bind="$attrs"
     @input="onInput"
+    @change="onChange"
   />
 </template>
 
@@ -34,8 +35,18 @@ const inputClass = computed(() =>
   ),
 );
 
-function onInput(e: Event): void {
+function syncValue(e: Event): void {
   const target = e.target as HTMLInputElement;
   emit('update:modelValue', target?.value ?? '');
+}
+
+function onInput(e: Event): void {
+  syncValue(e);
+}
+
+// iOS Safari often does not fire 'input' when user clears the native date/time picker;
+// it does fire 'change' when the picker is dismissed, so we sync the value there too.
+function onChange(e: Event): void {
+  syncValue(e);
 }
 </script>
