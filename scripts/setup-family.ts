@@ -75,8 +75,8 @@ async function main(): Promise<void> {
 
   rl.close();
 
-  if (!email1 || !password1 || !email2 || !password2) {
-    console.error('Sva polja (email i lozinka za oba korisnika) su obavezna.');
+  if (!email1 || !password1) {
+    console.error('Sva polja (email i lozinka za prvog korisnika) su obavezna.');
     process.exit(1);
   }
 
@@ -100,6 +100,8 @@ async function main(): Promise<void> {
     [email1, password1],
     [email2, password2],
   ] as [string, string][]) {
+    if (!email) continue;
+
     console.log(`Kreiranje korisnika ${email}...`);
     const { data: user, error: userErr } = await supabase.auth.admin.createUser({
       email,
@@ -130,7 +132,9 @@ async function main(): Promise<void> {
   console.log('=== Završeno ===');
   console.log('Porodica ID:', familyId);
   console.log('Korisnik 1 ID:', userIds[0]);
-  console.log('Korisnik 2 ID:', userIds[1]);
+  if (userIds.length >= 2) {
+    console.log('Korisnik 2 ID:', userIds[1]);
+  }
   console.log('\nKorisnici mogu da se prijave na aplikaciju sa unetim email-om i lozinkom.');
 }
 

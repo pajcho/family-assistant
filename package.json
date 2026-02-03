@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
+    "dev:local": "dotenv -e .env.local -- nuxt dev",
     "build": "nuxt build",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
@@ -14,7 +15,8 @@
     "fmt:check": "oxfmt --check",
     "check": "oxfmt --check && oxlint --deny-warnings",
     "prepare": "husky",
-    "setup-family": "tsx scripts/setup-family.ts"
+    "setup-family": "tsx scripts/setup-family.ts",
+    "setup-family:local": "dotenv -e .env.local -- tsx scripts/setup-family.ts"
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
@@ -23,6 +25,7 @@
     "@vueuse/core": "^11.2.0",
     "axios": "^1.7.0",
     "date-fns": "^4.1.0",
+    "dotenv-cli": "^11.0.0",
     "nuxt": "^3.14.0",
     "pulltorefreshjs": "^0.1.22",
     "sortablejs": "^1.15.6",
