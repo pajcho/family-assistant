@@ -1,16 +1,29 @@
 <template>
-  <input
-    :class="inputClass"
-    :type="type"
-    :value="modelValue"
-    :disabled="disabled"
-    v-bind="$attrs"
-    @input="onInput"
-    @change="onChange"
-  />
+  <div class="relative w-full">
+    <input
+      :class="inputClass"
+      :type="type"
+      :value="modelValue"
+      :disabled="disabled"
+      v-bind="$attrs"
+      @input="onInput"
+      @change="onChange"
+    />
+    <button
+      v-if="showClear"
+      type="button"
+      class="absolute right-2 top-1/2 -translate-y-1/2 rounded bg-white p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-300 dark:focus:ring-offset-gray-900"
+      :aria-label="clearLabel"
+      :title="clearLabel"
+      @click="onClear"
+    >
+      <XMarkIcon class="h-5 w-5" />
+    </button>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { XMarkIcon } from '@heroicons/vue/24/outline';
 import { cn } from '~/utils/cn';
 
 interface Props {
@@ -18,15 +31,25 @@ interface Props {
   type?: string;
   disabled?: boolean;
   class?: string;
+  /** Label for the clear button (date/time inputs). Shown when value is set. */
+  clearLabel?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   type: 'text',
   disabled: false,
+  clearLabel: 'Obriši',
 });
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
+
+const showClear = computed(
+  () =>
+    !props.disabled &&
+    (props.type === 'date' || props.type === 'time') &&
+    (props.modelValue ?? '').trim() !== '',
+);
 
 const inputClass = computed(() =>
   cn(
@@ -34,6 +57,10 @@ const inputClass = computed(() =>
     props.class,
   ),
 );
+
+function onClear(): void {
+  emit('update:modelValue', '');
+}
 
 function syncValue(e: Event): void {
   const target = e.target as HTMLInputElement;
