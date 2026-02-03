@@ -7,8 +7,6 @@
   body {
     @apply overflow-x-hidden bg-gray-50 text-gray-900;
     @apply dark:bg-gray-900 dark:text-gray-100;
-    /* Let pulltorefreshjs handle PTR; avoid native browser pull */
-    overscroll-behavior-y: contain;
   }
 
   /* Smooth color transitions for theme switching */
