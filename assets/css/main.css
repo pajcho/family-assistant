@@ -16,33 +16,69 @@
     @apply transition-colors duration-200;
   }
 
-  /* Date/time inputs: match default input size on mobile (browsers often enlarge them) */
+  /*
+   * Date/time on iOS: Safari ignores normal CSS and makes these inputs huge.
+   * Resetting appearance forces our sizing to apply; we hide the default icon
+   * and add a small custom one so the field matches other inputs.
+   */
   input[type='date'],
   input[type='time'],
   input[type='datetime-local'] {
-    min-height: 2.5rem;
-    height: 2.5rem;
-    max-height: 2.5rem;
-    font-size: 0.875rem;
-    padding-inline-end: 2rem;
+    -webkit-appearance: none;
+    appearance: none;
+    position: relative;
+    min-height: 2.5rem !important;
+    height: 2.5rem !important;
+    max-height: 2.5rem !important;
+    font-size: 0.875rem !important;
+    padding: 0.5rem 2rem 0.5rem 0.75rem !important;
+    box-sizing: border-box;
   }
 
-  /* Smaller calendar/clock icon so the field doesn’t look wider than other inputs */
+  /* Hide native icon but keep it clickable so picker still opens on tap */
   input[type='date']::-webkit-calendar-picker-indicator,
   input[type='time']::-webkit-calendar-picker-indicator,
   input[type='datetime-local']::-webkit-calendar-picker-indicator {
-    width: 1.25rem;
-    height: 1.25rem;
+    position: absolute;
+    width: 100%;
+    height: 100%;
     margin: 0;
-    opacity: 0.6;
+    padding: 0;
+    opacity: 0;
+    cursor: pointer;
   }
 
-  /* Dark mode: invert icon so it stays visible */
-  .dark input[type='date']::-webkit-calendar-picker-indicator,
-  .dark input[type='time']::-webkit-calendar-picker-indicator,
-  .dark input[type='datetime-local']::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 0.7;
+  input[type='date'] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.25rem 1.25rem;
+  }
+
+  .dark input[type='date'] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
+  }
+
+  input[type='time'] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.25rem 1.25rem;
+  }
+
+  .dark input[type='time'] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'/%3E%3C/svg%3E");
+  }
+
+  input[type='datetime-local'] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.25rem 1.25rem;
+  }
+
+  .dark input[type='datetime-local'] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
   }
 
   /* Pull-to-refresh (pulltorefreshjs): lighter text in dark mode */
