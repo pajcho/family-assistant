@@ -7,7 +7,7 @@ import {
   getDate,
   isBefore,
 } from 'date-fns';
-import { startOfToday } from '~/utils/date';
+import { startOfToday, formatDate } from '~/utils/date';
 
 /** Current age from birth_date (YYYY-MM-DD). */
 export function currentAge(birthDate: string): number {
@@ -36,7 +36,21 @@ export function daysUntilBirthday(birthDate: string): number {
   return differenceInDays(next, today);
 }
 
-/** Display text: "[Name] puni [age] godina za [X] dana" */
+/** Display line: "Ime · 🎂 koliko godina puni · 📅 datum · ⏳ za X dana" (⏳ samo ako je u narednih 30 dana). */
+export function birthdayDisplayLine(name: string, birthDate: string): string {
+  const nextAge = currentAge(birthDate) + 1;
+  const days = daysUntilBirthday(birthDate);
+  const dateStr = formatDate(birthDate);
+  let line = `${name} · 🎂 ${nextAge} · 📅 ${dateStr}`;
+  if (days <= 30) {
+    if (days === 0) line += ' · ⏳ danas';
+    else if (days === 1) line += ' · ⏳ sutra';
+    else line += ` · ⏳ za ${days} dana`;
+  }
+  return line;
+}
+
+/** Display text: "[Name] puni [age] godina za [X] dana" (za popup/detalje). */
 export function birthdayDisplayText(name: string, birthDate: string): string {
   const age = currentAge(birthDate);
   const nextAge = age + 1;

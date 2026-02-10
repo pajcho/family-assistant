@@ -29,11 +29,15 @@
         :key="b.id"
         class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
       >
-        <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
+        <div
+          class="flex flex-wrap gap-3 sm:flex-nowrap"
+          :class="b.description ? 'items-start' : 'items-center'"
+        >
           <div class="min-w-0 flex-1">
-            <p class="font-medium text-gray-900 dark:text-gray-100">
-              {{ birthdayDisplayText(b.name, b.birth_date) }}
-            </p>
+            <BirthdayDisplayLine
+              :name="b.name"
+              :birth-date="b.birth_date"
+            />
             <p
               v-if="b.description"
               class="mt-1 text-sm text-gray-500 dark:text-gray-400"
@@ -150,7 +154,8 @@ import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
 import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
 import BirthdayForm from '~/components/birthdays/BirthdayForm.vue';
-import { birthdayDisplayText, daysUntilBirthday } from '~/utils/birthday';
+import { daysUntilBirthday } from '~/utils/birthday';
+import BirthdayDisplayLine from '~/components/birthdays/BirthdayDisplayLine.vue';
 import { useBirthdays } from '~/composables/useBirthdays';
 import { useProfile } from '~/composables/useProfile';
 

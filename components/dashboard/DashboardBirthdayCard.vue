@@ -10,14 +10,24 @@
     @add="$emit('add')"
   >
     <template #items>
-      <DashboardCardItem
+      <button
         v-for="b in displayBirthdays"
         :key="b.id"
-        :label="b.name"
-        :value="daysLabel(b.birth_date)"
-        variant="emerald"
+        type="button"
+        class="flex w-full items-start justify-between gap-2 rounded-md bg-emerald-50 px-3 py-2 text-left text-sm transition-colors hover:bg-emerald-100 dark:bg-emerald-900/10 dark:hover:bg-emerald-900/30"
         @click="openDetail(b)"
-      />
+      >
+        <span class="min-w-0 flex-1">
+          <BirthdayDisplayLine
+            :name="b.name"
+            :birth-date="b.birth_date"
+            :hide-days="true"
+          />
+        </span>
+        <span class="shrink-0 text-emerald-700 dark:text-emerald-400">
+          {{ daysLabel(b.birth_date) }}
+        </span>
+      </button>
     </template>
   </DashboardCard>
 
@@ -46,30 +56,21 @@
             <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {{ selectedBirthday.name }}
             </p>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
-              {{ birthdayDisplayText(selectedBirthday.name, selectedBirthday.birth_date) }}
-            </p>
           </div>
         </div>
 
         <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
           <dl class="space-y-2 text-sm">
             <div class="flex justify-between">
+              <dt class="text-gray-500 dark:text-gray-400">Puni godina:</dt>
+              <dd class="font-medium text-gray-900 dark:text-gray-100">
+                {{ currentAge(selectedBirthday.birth_date) + 1 }}
+              </dd>
+            </div>
+            <div class="flex justify-between">
               <dt class="text-gray-500 dark:text-gray-400">Datum rođenja:</dt>
               <dd class="font-medium text-gray-900 dark:text-gray-100">
                 {{ formatDate(selectedBirthday.birth_date) }}
-              </dd>
-            </div>
-            <div class="flex justify-between">
-              <dt class="text-gray-500 dark:text-gray-400">Trenutne godine:</dt>
-              <dd class="font-medium text-gray-900 dark:text-gray-100">
-                {{ currentAge(selectedBirthday.birth_date) }}
-              </dd>
-            </div>
-            <div class="flex justify-between">
-              <dt class="text-gray-500 dark:text-gray-400">Sledeći rođendan:</dt>
-              <dd class="font-medium text-gray-900 dark:text-gray-100">
-                {{ formatDate(nextBirthdayDateStr(selectedBirthday.birth_date)) }}
               </dd>
             </div>
             <div
@@ -103,13 +104,8 @@ import type { Birthday } from '~/types/database';
 import { Button } from '~/components/ui/button';
 import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
 import DashboardCard from '~/components/dashboard/DashboardCard.vue';
-import DashboardCardItem from '~/components/dashboard/DashboardCardItem.vue';
-import {
-  daysUntilBirthday,
-  currentAge,
-  birthdayDisplayText,
-  nextBirthdayDate,
-} from '~/utils/birthday';
+import BirthdayDisplayLine from '~/components/birthdays/BirthdayDisplayLine.vue';
+import { daysUntilBirthday, currentAge, nextBirthdayDate } from '~/utils/birthday';
 import { formatDate } from '~/utils/date';
 
 interface Props {
@@ -152,11 +148,6 @@ function daysLabel(birthDate: string): string {
   if (days === 0) return 'danas';
   if (days === 1) return 'sutra';
   return `za ${days} dana`;
-}
-
-function nextBirthdayDateStr(birthDate: string): string {
-  const d = nextBirthdayDate(birthDate);
-  return d.toISOString().slice(0, 10);
 }
 
 function openDetail(b: Birthday): void {
