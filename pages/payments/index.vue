@@ -261,6 +261,7 @@
     <PaymentHistoryPopup
       v-model:open="historyPopupOpen"
       :payment="selectedPaymentForHistory"
+      @undo="loadData"
     />
 
     <!-- Summary section -->
