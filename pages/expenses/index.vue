@@ -274,7 +274,7 @@ function openEdit(e: Expense): void {
 
 async function onFormSubmit(payload: {
   name: string;
-  description?: string;
+  description: string | null;
   amount: number;
 }): Promise<void> {
   if (editingExpense.value) {

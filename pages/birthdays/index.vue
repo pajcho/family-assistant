@@ -199,7 +199,7 @@ function openEdit(b: Birthday): void {
 
 async function onFormSubmit(payload: {
   name: string;
-  description?: string;
+  description: string | null;
   birth_date: string;
 }): Promise<void> {
   errorMessage.value = '';

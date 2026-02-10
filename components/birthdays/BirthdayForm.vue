@@ -62,7 +62,7 @@ const emit = defineEmits<{
   submit: [
     payload: {
       name: string;
-      description?: string;
+      description: string | null;
       birth_date: string;
     },
   ];
@@ -96,7 +96,7 @@ function onSubmit(): void {
   saving.value = true;
   emit('submit', {
     name: form.name.trim(),
-    description: form.description.trim() || undefined,
+    description: form.description.trim() || null,
     birth_date: form.birth_date,
   });
   saving.value = false;

@@ -143,11 +143,11 @@ function onSubmit(): void {
   const endTime = form.end_time.trim();
   emit('submit', {
     name: form.name.trim(),
-    description: form.description.trim() || undefined,
+    description: form.description.trim() || null,
     date: form.date,
     start_time: form.allDay ? null : startTime || null,
     end_time: form.allDay ? null : endTime || null,
-    notes: form.notes.trim() || undefined,
+    notes: form.notes.trim() || null,
   });
   saving.value = false;
 }

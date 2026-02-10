@@ -149,7 +149,7 @@ const emit = defineEmits<{
   submit: [
     payload: {
       name: string;
-      description?: string;
+      description: string | null;
       amount: number;
       due_date: string;
       is_recurring: boolean;
@@ -202,7 +202,7 @@ function onSubmit(): void {
   saving.value = true;
   emit('submit', {
     name: form.name.trim(),
-    description: form.description.trim() || undefined,
+    description: form.description.trim() || null,
     amount: amountNum,
     due_date: form.due_date,
     is_recurring: isRecurring,

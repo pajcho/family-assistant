@@ -726,7 +726,7 @@ async function openEdit(item: PaymentListItem): Promise<void> {
 
 async function onFormSubmit(payload: {
   name: string;
-  description?: string;
+  description: string | null;
   amount: number;
   due_date: string;
   is_recurring: boolean;
