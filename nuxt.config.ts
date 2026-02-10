@@ -3,6 +3,9 @@ export default defineNuxtConfig({
   future: { compatibilityVersion: 4 },
   ssr: false,
   devtools: { enabled: true },
+  devServer: {
+    port: 3001,
+  },
   app: {
     baseURL: process.env.NUXT_APP_BASE_URL ?? '/family-assistant/',
     head: {
