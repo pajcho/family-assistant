@@ -109,7 +109,7 @@
               <template v-else>
                 <span
                   v-if="item.is_paid"
-                  class="text-gray-500 dark:text-gray-400"
+                  class="font-medium text-emerald-600 dark:text-emerald-400"
                 >
                   Plaćeno {{ item.paid_date ? formatDate(item.paid_date) : '' }}
                 </span>
@@ -180,6 +180,7 @@
                   @click="handleTogglePause(item)"
                 />
                 <DropdownItem
+                  v-if="item.recurrence_period !== 'one-time'"
                   label="Istorija"
                   :icon="ClockIcon"
                   @click="openHistory(item)"
@@ -227,6 +228,7 @@
                 </Button>
               </template>
               <Button
+                v-if="item.recurrence_period !== 'one-time'"
                 variant="outline"
                 size="sm"
                 @click="openHistory(item)"
