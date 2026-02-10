@@ -567,10 +567,15 @@ const combinedList = computed<ListItem[]>(() => {
       });
     }
 
-    // Add upcoming rows for current/future months (informational only)
+    // Add upcoming rows for current/future months (informational only).
+    // Do not add upcoming for a payment if that month's instance was already paid (has history entry).
     if (sel >= currentMonth) {
+      const paymentIdsWithHistoryInMonth = new Set(
+        allHistory.value.filter((h) => h.due_date.startsWith(sel)).map((h) => h.payment_id),
+      );
       for (const p of allPayments.value) {
         if (p.is_paid || p.is_paused) continue;
+        if (paymentIdsWithHistoryInMonth.has(p.id)) continue; // already paid this month
         const period = p.recurrence_period;
         const hasRealRow = p.due_date.startsWith(sel);
 
@@ -648,8 +653,12 @@ const summary = computed(() => {
 
   // Include upcoming amounts for this month in unpaid total (same logic as combinedList)
   if (sel >= currentMonth) {
+    const paymentIdsWithHistoryInMonth = new Set(
+      allHistory.value.filter((h) => h.due_date.startsWith(sel)).map((h) => h.payment_id),
+    );
     for (const p of allPayments.value) {
       if (p.is_paid || p.is_paused) continue;
+      if (paymentIdsWithHistoryInMonth.has(p.id)) continue;
       const hasRealRow = p.due_date.startsWith(sel);
       if (p.recurrence_period === 'monthly' && !hasRealRow) {
         unpaidTotal += p.amount;
