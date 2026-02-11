@@ -34,10 +34,10 @@
       </div>
       <div class="space-y-2">
         <Label for="due_date">Datum dospeća *</Label>
-        <Input
+        <DatePicker
           id="due_date"
           v-model="form.due_date"
-          type="date"
+          placeholder="Datum dospeća"
           required
         />
       </div>
@@ -133,6 +133,7 @@
 <script setup lang="ts">
 import type { Payment, RecurrencePeriod } from '~/types/database';
 import { Button } from '~/components/ui/button';
+import { DatePicker } from '~/components/ui/date-picker';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 

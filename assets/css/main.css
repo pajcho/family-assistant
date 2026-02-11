@@ -1,3 +1,5 @@
+@import '@vuepic/vue-datepicker/dist/main.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -24,71 +26,6 @@
     @apply transition-colors duration-200;
   }
 
-  /*
-   * Date/time on iOS: Safari ignores normal CSS and makes these inputs huge.
-   * Resetting appearance forces our sizing to apply; we hide the default icon
-   * and add a small custom one so the field matches other inputs.
-   */
-  input[type='date'],
-  input[type='time'],
-  input[type='datetime-local'] {
-    -webkit-appearance: none;
-    appearance: none;
-    position: relative;
-    min-height: 2.5rem !important;
-    height: 2.5rem !important;
-    max-height: 2.5rem !important;
-    font-size: 0.875rem !important;
-    padding: 0.5rem 2rem 0.5rem 0.75rem !important;
-    box-sizing: border-box;
-  }
-
-  /* Hide native icon but keep it clickable so picker still opens on tap */
-  input[type='date']::-webkit-calendar-picker-indicator,
-  input[type='time']::-webkit-calendar-picker-indicator,
-  input[type='datetime-local']::-webkit-calendar-picker-indicator {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    opacity: 0;
-    cursor: pointer;
-  }
-
-  input[type='date'] {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    background-size: 1.25rem 1.25rem;
-  }
-
-  .dark input[type='date'] {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
-  }
-
-  input[type='time'] {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    background-size: 1.25rem 1.25rem;
-  }
-
-  .dark input[type='time'] {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'/%3E%3C/svg%3E");
-  }
-
-  input[type='datetime-local'] {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    background-size: 1.25rem 1.25rem;
-  }
-
-  .dark input[type='datetime-local'] {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
-  }
-
   /* Pull-to-refresh (pulltorefreshjs): lighter text in dark mode */
   .dark .ptr,
   .dark .ptr--text,
@@ -96,6 +33,33 @@
   .dark .ptr--icon {
     color: rgb(209 213 219) !important;
   }
+}
+
+/* VuePic DatePicker: align with app light/dark theme (Tailwind gray + blue) */
+.dp__theme_light {
+  --dp-border-color: #d1d5db;
+  --dp-border-color-hover: #9ca3af;
+  --dp-border-color-focus: #3b82f6;
+  --dp-primary-color: #3b82f6;
+  --dp-primary-text-color: #fff;
+  --dp-background-color: #fff;
+  --dp-text-color: #111827;
+  --dp-hover-color: #f3f4f6;
+  --dp-hover-text-color: #111827;
+  --dp-menu-border-color: #e5e7eb;
+}
+
+.dp__theme_dark {
+  --dp-border-color: #4b5563;
+  --dp-border-color-hover: #6b7280;
+  --dp-border-color-focus: #3b82f6;
+  --dp-primary-color: #3b82f6;
+  --dp-primary-text-color: #fff;
+  --dp-background-color: #374151;
+  --dp-text-color: #f3f4f6;
+  --dp-hover-color: #4b5563;
+  --dp-hover-text-color: #f3f4f6;
+  --dp-menu-border-color: #4b5563;
 }
 
 @layer utilities {

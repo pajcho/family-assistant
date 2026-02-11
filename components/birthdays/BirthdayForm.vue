@@ -22,10 +22,10 @@
     </div>
     <div class="space-y-2">
       <Label for="birth_date">Datum rođenja *</Label>
-      <Input
+      <DatePicker
         id="birth_date"
         v-model="form.birth_date"
-        type="date"
+        placeholder="Datum rođenja"
         required
       />
     </div>
@@ -50,6 +50,7 @@
 <script setup lang="ts">
 import type { Birthday } from '~/types/database';
 import { Button } from '~/components/ui/button';
+import { DatePicker } from '~/components/ui/date-picker';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 

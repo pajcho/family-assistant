@@ -17,6 +17,9 @@ export default defineNuxtConfig({
     },
   },
   modules: ['@nuxtjs/tailwindcss', '@peterbud/nuxt-query', 'shadcn-nuxt'],
+  build: {
+    transpile: ['@vuepic/vue-datepicker'],
+  },
   shadcn: {
     prefix: '',
     componentDir: './components/ui',

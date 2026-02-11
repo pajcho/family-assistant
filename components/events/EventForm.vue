@@ -22,10 +22,10 @@
     </div>
     <div class="space-y-2">
       <Label for="date">Datum *</Label>
-      <Input
+      <DatePicker
         id="date"
         v-model="form.date"
-        type="date"
+        placeholder="Izaberi datum"
         required
       />
     </div>
@@ -49,18 +49,20 @@
     >
       <div class="space-y-2">
         <Label for="start_time">Početak (opciono)</Label>
-        <Input
+        <TimePicker
+          :key="`start-${props.event?.id ?? 'new'}`"
           id="start_time"
           v-model="form.start_time"
-          type="time"
+          placeholder="00:00"
         />
       </div>
       <div class="space-y-2">
         <Label for="end_time">Završetak (opciono)</Label>
-        <Input
+        <TimePicker
+          :key="`end-${props.event?.id ?? 'new'}`"
           id="end_time"
           v-model="form.end_time"
-          type="time"
+          placeholder="00:00"
         />
       </div>
     </div>
@@ -93,6 +95,7 @@
 <script setup lang="ts">
 import type { Event } from '~/types/database';
 import { Button } from '~/components/ui/button';
+import { DatePicker, TimePicker } from '~/components/ui/date-picker';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 

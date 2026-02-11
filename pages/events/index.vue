@@ -28,10 +28,10 @@
         >
           Od
         </Label>
-        <Input
+        <DatePicker
           id="from"
           v-model="filterFrom"
-          type="date"
+          placeholder="Od"
           class="w-40"
         />
       </div>
@@ -42,10 +42,10 @@
         >
           Do
         </Label>
-        <Input
+        <DatePicker
           id="to"
           v-model="filterTo"
-          type="date"
+          placeholder="Do"
           class="w-40"
         />
       </div>
@@ -113,7 +113,7 @@
 import { PlusIcon } from '@heroicons/vue/24/outline';
 import type { Event } from '~/types/database';
 import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
+import { DatePicker } from '~/components/ui/date-picker';
 import { Label } from '~/components/ui/label';
 import ConfirmDialog from '~/components/ui/ConfirmDialog.vue';
 import EventFormDialog from '~/components/events/EventFormDialog.vue';
