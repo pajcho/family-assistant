@@ -108,7 +108,7 @@ const unpaidTotal = computed(() =>
 );
 
 const deleteConfirmMessage = computed(
-  () => `Da li ste sigurni da želite da obrišete „${expenseToDelete.value?.name ?? ''}"?`,
+  () => `Da li ste sigurni da želite da obrišete "${expenseToDelete.value?.name ?? ''}"?`,
 );
 
 async function loadExpenses(): Promise<void> {

@@ -366,11 +366,11 @@ const displayedList = computed<ListItem[]>(() => {
 
 const emptyListMessage = computed(() => {
   if (combinedList.value.length === 0) return 'Nema plaćanja za prikaz.';
-  return 'Nema neplaćenih plaćanja. Sve stavke su plaćene ili ih sakriva filter „Sakrij plaćena".';
+  return 'Nema neplaćenih plaćanja. Sve stavke su plaćene i sakrivene filtom "Sakrij plaćena".';
 });
 
 const deleteConfirmMessage = computed(
-  () => `Da li ste sigurni da želite da obrišete „${paymentToDelete.value?.name ?? ''}"?`,
+  () => `Da li ste sigurni da želite da obrišete "${paymentToDelete.value?.name ?? ''}"?`,
 );
 
 // Summary computed properties

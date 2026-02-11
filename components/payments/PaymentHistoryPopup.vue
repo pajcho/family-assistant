@@ -84,7 +84,7 @@
     </DialogHeader>
     <DialogContent>
       <p class="text-gray-600 dark:text-gray-400">
-        Da li ste sigurni da želite da poništite poslednje plaćanje za „{{ payment?.name }}"?
+        Da li ste sigurni da želite da poništite poslednje plaćanje za "{{ payment?.name }}"?
       </p>
       <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
         Ovo će obrisati zapis iz istorije i vratiti datum dospeća na prethodni mesec (kod mesečnih

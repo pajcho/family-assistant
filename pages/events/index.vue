@@ -146,7 +146,7 @@ const filteredEvents = computed(() => {
 });
 
 const deleteConfirmMessage = computed(
-  () => `Da li ste sigurni da želite da obrišete „${eventToDelete.value?.name ?? ''}"?`,
+  () => `Da li ste sigurni da želite da obrišete "${eventToDelete.value?.name ?? ''}"?`,
 );
 
 async function loadEvents(): Promise<void> {

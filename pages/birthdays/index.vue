@@ -85,7 +85,7 @@ const sortedBirthdays = computed(() => {
 });
 
 const deleteConfirmMessage = computed(
-  () => `Da li ste sigurni da želite da obrišete „${birthdayToDelete.value?.name ?? ''}"?`,
+  () => `Da li ste sigurni da želite da obrišete "${birthdayToDelete.value?.name ?? ''}"?`,
 );
 
 async function loadBirthdays(): Promise<void> {
