@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+  <div class="flex flex-col flex-wrap gap-x-3 gap-y-1">
     <span class="shrink-0 font-medium text-gray-900 dark:text-gray-100">{{ name }}</span>
     <span
       class="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs leading-none text-gray-500 dark:text-gray-400"
@@ -13,7 +13,7 @@
         {{ dateStr }}
       </span>
       <span
-        v-if="!hideDays && daysUntil <= 30"
+        v-if="!hideDays"
         class="inline-flex items-center gap-1"
       >
         <ClockIcon class="h-3.5 w-3.5 shrink-0" />

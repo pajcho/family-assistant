@@ -8,17 +8,29 @@
       </Button>
     </div>
 
-    <!-- Month filter buttons -->
-    <div class="mt-4 flex flex-wrap gap-2">
-      <Button
-        v-for="filter in monthFilters"
-        :key="filter.value"
-        :variant="selectedMonth === filter.value ? 'default' : 'outline'"
-        size="sm"
-        @click="selectedMonth = filter.value"
+    <!-- Month filter + Sakrij plaćena -->
+    <div class="mt-4 flex flex-wrap items-center gap-4">
+      <div class="flex flex-wrap gap-2">
+        <Button
+          v-for="filter in monthFilters"
+          :key="filter.value"
+          :variant="selectedMonth === filter.value ? 'default' : 'outline'"
+          size="sm"
+          @click="selectedMonth = filter.value"
+        >
+          {{ filter.label }}
+        </Button>
+      </div>
+      <label
+        class="flex cursor-pointer items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
       >
-        {{ filter.label }}
-      </Button>
+        <input
+          v-model="hidePaid"
+          type="checkbox"
+          class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-500"
+        />
+        Sakrij plaćena
+      </label>
     </div>
 
     <div
@@ -28,10 +40,10 @@
       Učitavanje…
     </div>
     <div
-      v-else-if="combinedList.length === 0"
+      v-else-if="displayedList.length === 0"
       class="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-center text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
     >
-      Nema plaćanja za prikaz.
+      {{ emptyListMessage }}
     </div>
     <ul
       v-else
@@ -39,7 +51,7 @@
     >
       <!-- Payment/History items -->
       <li
-        v-for="item in combinedList"
+        v-for="item in displayedList"
         :key="item.id"
         class="rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-800"
         :class="getItemClass(item)"
@@ -472,6 +484,7 @@ const allPayments = ref<Payment[]>([]);
 const allHistory = ref<PaymentHistory[]>([]);
 const loading = ref(true);
 const selectedMonth = ref('all');
+const hidePaid = ref(false);
 const dialogOpen = ref(false);
 const deleteDialogOpen = ref(false);
 const editingPayment = ref<Payment | null>(null);
@@ -548,7 +561,13 @@ const combinedList = computed<ListItem[]>(() => {
   }
 
   // Add history entries (only when filtering by month)
+  // Skip history for one-time payments due in this month — they are already shown as payment rows
   if (sel !== 'all') {
+    const oneTimePaymentIdsInMonth = new Set(
+      allPayments.value
+        .filter((p) => p.recurrence_period === 'one-time' && p.due_date.startsWith(sel))
+        .map((p) => p.id),
+    );
     const lastHistoryByPayment = new Map<string, { id: string; paid_date: string }>();
     for (const h of allHistory.value) {
       const existing = lastHistoryByPayment.get(h.payment_id);
@@ -558,6 +577,7 @@ const combinedList = computed<ListItem[]>(() => {
     }
     for (const h of allHistory.value) {
       if (!h.due_date.startsWith(sel)) continue;
+      if (oneTimePaymentIdsInMonth.has(h.payment_id)) continue;
       items.push({
         type: 'history',
         id: h.id,
@@ -621,6 +641,21 @@ const combinedList = computed<ListItem[]>(() => {
   return items;
 });
 
+// When "Sakrij plaćena" is on, hide payment rows that are paid and all history rows
+const displayedList = computed<ListItem[]>(() => {
+  if (!hidePaid.value) return combinedList.value;
+  return combinedList.value.filter((item) => {
+    if (item.type === 'history') return false;
+    if (item.type === 'payment' && item.is_paid) return false;
+    return true;
+  });
+});
+
+const emptyListMessage = computed(() => {
+  if (combinedList.value.length === 0) return 'Nema plaćanja za prikaz.';
+  return 'Nema neplaćenih plaćanja. Sve stavke su plaćene ili ih sakriva filter „Sakrij plaćena".';
+});
+
 // Summary computed properties
 const summary = computed(() => {
   if (selectedMonth.value === 'all') {
@@ -648,9 +683,15 @@ const summary = computed(() => {
     }
   }
 
-  // Count history entries for this month
+  // Count history entries for this month (skip one-time due in this month — already in payment count)
+  const oneTimePaymentIdsInMonth = new Set(
+    allPayments.value
+      .filter((p) => p.recurrence_period === 'one-time' && p.due_date.startsWith(sel))
+      .map((p) => p.id),
+  );
   for (const h of allHistory.value) {
     if (!h.due_date.startsWith(sel)) continue;
+    if (oneTimePaymentIdsInMonth.has(h.payment_id)) continue;
     paidTotal += h.amount;
   }
 
