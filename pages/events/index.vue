@@ -84,146 +84,40 @@
             : 'border-gray-200 bg-white dark:bg-gray-800',
         ]"
       >
-        <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
-          <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-2">
-              <p class="font-medium text-gray-900 dark:text-gray-100">{{ ev.name }}</p>
-              <span
-                v-if="isEventEnded(ev)"
-                class="rounded bg-gray-200 px-1.5 py-0.5 text-xs text-gray-600 dark:bg-gray-600 dark:text-gray-400"
-              >
-                Završeno
-              </span>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
-              {{ formatDate(ev.date) }} · {{ formatEventTimeRange(ev) }}
-            </p>
-            <p
-              v-if="ev.description"
-              class="mt-1 text-sm text-gray-500 dark:text-gray-400"
-            >
-              {{ ev.description }}
-            </p>
-            <p
-              v-if="ev.notes"
-              class="mt-1 text-sm text-amber-700 dark:text-amber-400"
-            >
-              {{ ev.notes }}
-            </p>
-          </div>
-          <!-- Mobile: Dropdown menu -->
-          <div class="flex shrink-0 sm:hidden">
-            <Dropdown>
-              <DropdownItem
-                label="Izmeni"
-                :icon="PencilIcon"
-                @click="openEdit(ev)"
-              />
-              <DropdownItem
-                label="Obriši"
-                :icon="TrashIcon"
-                variant="destructive"
-                @click="confirmDelete(ev)"
-              />
-            </Dropdown>
-          </div>
-          <!-- Desktop: Regular buttons -->
-          <div class="hidden shrink-0 gap-2 sm:flex">
-            <Button
-              variant="outline"
-              size="sm"
-              @click="openEdit(ev)"
-            >
-              <PencilIcon class="mr-1 h-4 w-4" />
-              Izmeni
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              @click="confirmDelete(ev)"
-            >
-              <TrashIcon class="mr-1 h-4 w-4" />
-              Obriši
-            </Button>
-          </div>
-        </div>
+        <EventsEventListItem
+          :event="ev"
+          @edit="openEdit"
+          @delete="confirmDelete"
+        />
       </li>
     </ul>
 
-    <Dialog
+    <EventFormDialog
       v-model:open="dialogOpen"
-      title-id="event-dialog-title"
-    >
-      <DialogHeader>
-        <h2
-          id="event-dialog-title"
-          class="text-lg font-semibold"
-        >
-          {{ editingEvent ? 'Izmeni događaj' : 'Dodaj događaj' }}
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <div
-          v-if="errorMessage"
-          class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
-        >
-          {{ errorMessage }}
-        </div>
-        <EventForm
-          :event="editingEvent"
-          @submit="onFormSubmit"
-          @cancel="dialogOpen = false"
-        />
-      </DialogContent>
-    </Dialog>
-
-    <Dialog
+      :event="editingEvent"
+      :error="errorMessage"
+      @submit="onFormSubmit"
+      @cancel="dialogOpen = false"
+    />
+    <ConfirmDialog
       v-model:open="deleteDialogOpen"
-      title-id="delete-dialog-title"
-    >
-      <DialogHeader>
-        <h2
-          id="delete-dialog-title"
-          class="text-lg font-semibold"
-        >
-          Obriši događaj
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <p class="text-gray-600">
-          Da li ste sigurni da želite da obrišete „{{ eventToDelete?.name }}”?
-        </p>
-      </DialogContent>
-      <DialogFooter>
-        <Button
-          variant="outline"
-          @click="deleteDialogOpen = false"
-        >
-          Otkaži
-        </Button>
-        <Button
-          variant="destructive"
-          :disabled="deleting"
-          @click="doDelete"
-        >
-          Obriši
-        </Button>
-      </DialogFooter>
-    </Dialog>
+      title="Obriši događaj"
+      :message="deleteConfirmMessage"
+      :loading="deleting"
+      @confirm="doDelete"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import type { Event } from '~/types/database';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
-import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
-import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
-import EventForm from '~/components/events/EventForm.vue';
-import { formatDate } from '~/utils/date';
-import { isEventEnded, formatEventTimeRange } from '~/utils/event';
+import ConfirmDialog from '~/components/ui/ConfirmDialog.vue';
+import EventFormDialog from '~/components/events/EventFormDialog.vue';
+import { isEventEnded } from '~/utils/event';
 import { useEvents } from '~/composables/useEvents';
 import { useProfile } from '~/composables/useProfile';
 
@@ -250,6 +144,10 @@ const filteredEvents = computed(() => {
   }
   return [...events.value];
 });
+
+const deleteConfirmMessage = computed(
+  () => `Da li ste sigurni da želite da obrišete „${eventToDelete.value?.name ?? ''}"?`,
+);
 
 async function loadEvents(): Promise<void> {
   await fetchProfile();

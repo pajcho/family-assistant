@@ -29,133 +29,38 @@
         :key="b.id"
         class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
       >
-        <div
-          class="flex flex-wrap gap-3 sm:flex-nowrap"
-          :class="b.description ? 'items-start' : 'items-center'"
-        >
-          <div class="min-w-0 flex-1">
-            <BirthdayDisplayLine
-              :name="b.name"
-              :birth-date="b.birth_date"
-            />
-            <p
-              v-if="b.description"
-              class="mt-1 text-sm text-gray-500 dark:text-gray-400"
-            >
-              {{ b.description }}
-            </p>
-          </div>
-          <!-- Mobile: Dropdown menu -->
-          <div class="flex shrink-0 sm:hidden">
-            <Dropdown>
-              <DropdownItem
-                label="Izmeni"
-                :icon="PencilIcon"
-                @click="openEdit(b)"
-              />
-              <DropdownItem
-                label="Obriši"
-                :icon="TrashIcon"
-                variant="destructive"
-                @click="confirmDelete(b)"
-              />
-            </Dropdown>
-          </div>
-          <!-- Desktop: Regular buttons -->
-          <div class="hidden shrink-0 gap-2 sm:flex">
-            <Button
-              variant="outline"
-              size="sm"
-              @click="openEdit(b)"
-            >
-              <PencilIcon class="mr-1 h-4 w-4" />
-              Izmeni
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              @click="confirmDelete(b)"
-            >
-              <TrashIcon class="mr-1 h-4 w-4" />
-              Obriši
-            </Button>
-          </div>
-        </div>
+        <BirthdaysBirthdayListItem
+          :birthday="b"
+          @edit="openEdit"
+          @delete="confirmDelete"
+        />
       </li>
     </ul>
 
-    <Dialog
+    <BirthdayFormDialog
       v-model:open="dialogOpen"
-      title-id="birthday-dialog-title"
-    >
-      <DialogHeader>
-        <h2
-          id="birthday-dialog-title"
-          class="text-lg font-semibold"
-        >
-          {{ editingBirthday ? 'Izmeni rođendan' : 'Dodaj rođendan' }}
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <div
-          v-if="errorMessage"
-          class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
-        >
-          {{ errorMessage }}
-        </div>
-        <BirthdayForm
-          :birthday="editingBirthday"
-          @submit="onFormSubmit"
-          @cancel="dialogOpen = false"
-        />
-      </DialogContent>
-    </Dialog>
-
-    <Dialog
+      :birthday="editingBirthday"
+      :error="errorMessage"
+      @submit="onFormSubmit"
+      @cancel="dialogOpen = false"
+    />
+    <ConfirmDialog
       v-model:open="deleteDialogOpen"
-      title-id="delete-birthday-title"
-    >
-      <DialogHeader>
-        <h2
-          id="delete-birthday-title"
-          class="text-lg font-semibold"
-        >
-          Obriši rođendan
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <p class="text-gray-600">
-          Da li ste sigurni da želite da obrišete „{{ birthdayToDelete?.name }}”?
-        </p>
-      </DialogContent>
-      <DialogFooter>
-        <Button
-          variant="outline"
-          @click="deleteDialogOpen = false"
-        >
-          Otkaži
-        </Button>
-        <Button
-          variant="destructive"
-          :disabled="deleting"
-          @click="doDelete"
-        >
-          Obriši
-        </Button>
-      </DialogFooter>
-    </Dialog>
+      title="Obriši rođendan"
+      :message="deleteConfirmMessage"
+      :loading="deleting"
+      @confirm="doDelete"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import type { Birthday } from '~/types/database';
 import { Button } from '~/components/ui/button';
-import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
-import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
-import BirthdayForm from '~/components/birthdays/BirthdayForm.vue';
+import ConfirmDialog from '~/components/ui/ConfirmDialog.vue';
+import BirthdayFormDialog from '~/components/birthdays/BirthdayFormDialog.vue';
 import { daysUntilBirthday } from '~/utils/birthday';
-import BirthdayDisplayLine from '~/components/birthdays/BirthdayDisplayLine.vue';
 import { useBirthdays } from '~/composables/useBirthdays';
 import { useProfile } from '~/composables/useProfile';
 
@@ -178,6 +83,10 @@ const sortedBirthdays = computed(() => {
     (a, b) => daysUntilBirthday(a.birth_date) - daysUntilBirthday(b.birth_date),
   );
 });
+
+const deleteConfirmMessage = computed(
+  () => `Da li ste sigurni da želite da obrišete „${birthdayToDelete.value?.name ?? ''}"?`,
+);
 
 async function loadBirthdays(): Promise<void> {
   await fetchProfile();

@@ -56,217 +56,15 @@
         class="rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-800"
         :class="getItemClass(item)"
       >
-        <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
-          <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-2">
-              <p class="font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
-              <span
-                v-if="item.type === 'history' || (item.type === 'payment' && item.is_paid)"
-                class="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400"
-              >
-                Plaćeno
-              </span>
-              <span
-                v-else-if="item.type === 'payment' && !item.is_paused && isOverdue(item.due_date)"
-                class="rounded bg-red-200 px-1.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-800/60 dark:text-red-200"
-              >
-                Prekoračeno
-              </span>
-              <span
-                v-else-if="item.type === 'upcoming'"
-                class="rounded bg-sky-100 px-1.5 py-0.5 text-xs font-medium text-sky-700 dark:bg-sky-900/50 dark:text-sky-400"
-              >
-                Nadolazeće
-              </span>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
-              {{ formatDate(item.due_date) }} · {{ formatAmount(item.amount) }}
-            </p>
-            <p
-              v-if="'description' in item && item.description"
-              class="mt-1 text-sm text-gray-500 dark:text-gray-400"
-            >
-              {{ item.description }}
-            </p>
-            <div class="mt-1 flex flex-wrap gap-2 text-xs">
-              <!-- History entry -->
-              <template v-if="item.type === 'history'">
-                <span class="font-medium text-emerald-600 dark:text-emerald-400">
-                  Plaćeno {{ formatDate(item.paid_date) }}
-                </span>
-              </template>
-              <!-- Upcoming (informational only) -->
-              <template v-else-if="item.type === 'upcoming'">
-                <span class="font-medium text-sky-600 dark:text-sky-400">Nadolazeće</span>
-                <span
-                  v-if="item.recurrence_period === 'monthly'"
-                  class="text-gray-500 dark:text-gray-400"
-                >
-                  Mesečno
-                </span>
-                <span
-                  v-else-if="
-                    item.recurrence_period === 'limited' && item.remaining_occurrences != null
-                  "
-                  class="text-gray-500 dark:text-gray-400"
-                >
-                  Ostalo {{ item.remaining_occurrences }} uplata
-                </span>
-              </template>
-              <!-- Paused payment -->
-              <template v-else-if="item.is_paused">
-                <span class="font-medium text-gray-500 dark:text-gray-400">Pauzirano</span>
-              </template>
-              <!-- Active payment -->
-              <template v-else>
-                <span
-                  v-if="item.is_paid"
-                  class="font-medium text-emerald-600 dark:text-emerald-400"
-                >
-                  Plaćeno {{ item.paid_date ? formatDate(item.paid_date) : '' }}
-                </span>
-                <span
-                  v-else-if="item.recurrence_period === 'monthly'"
-                  class="text-amber-600 dark:text-amber-400"
-                >
-                  Mesečno
-                </span>
-                <span
-                  v-else-if="item.recurrence_period === 'limited'"
-                  class="text-amber-600 dark:text-amber-400"
-                >
-                  Ostalo {{ item.remaining_occurrences ?? 0 }} uplata
-                </span>
-                <span
-                  v-else
-                  class="text-gray-500 dark:text-gray-400"
-                >
-                  Jednokratno
-                </span>
-              </template>
-            </div>
-          </div>
-          <!-- History: Undo button -->
-          <template v-if="item.type === 'history' && item.isLast">
-            <div class="flex shrink-0 sm:hidden">
-              <Dropdown>
-                <DropdownItem
-                  label="Poništi"
-                  :icon="ArrowUturnLeftIcon"
-                  @click="confirmUndo(item)"
-                />
-              </Dropdown>
-            </div>
-            <div class="hidden shrink-0 sm:flex">
-              <Button
-                variant="outline"
-                size="sm"
-                @click="confirmUndo(item)"
-              >
-                Poništi
-              </Button>
-            </div>
-          </template>
-          <!-- Upcoming: no actions (informational only) -->
-          <!-- Payment: Actions -->
-          <template v-if="item.type === 'payment'">
-            <!-- Mobile: Dropdown -->
-            <div class="flex shrink-0 sm:hidden">
-              <Dropdown>
-                <DropdownItem
-                  v-if="!item.is_paid && !item.is_paused"
-                  label="Označi kao plaćeno"
-                  :icon="CheckIcon"
-                  @click="markPaid(item)"
-                />
-                <DropdownItem
-                  v-if="!item.is_paid && item.recurrence_period !== 'one-time' && item.is_paused"
-                  label="Nastavi"
-                  :icon="PlayIcon"
-                  @click="handleTogglePause(item)"
-                />
-                <DropdownItem
-                  v-if="!item.is_paid && item.recurrence_period !== 'one-time' && !item.is_paused"
-                  label="Pauziraj"
-                  :icon="PauseIcon"
-                  @click="handleTogglePause(item)"
-                />
-                <DropdownItem
-                  v-if="item.recurrence_period !== 'one-time'"
-                  label="Istorija"
-                  :icon="ClockIcon"
-                  @click="openHistory(item)"
-                />
-                <DropdownItem
-                  label="Izmeni"
-                  :icon="PencilIcon"
-                  @click="openEdit(item)"
-                />
-                <DropdownItem
-                  label="Obriši"
-                  :icon="TrashIcon"
-                  variant="destructive"
-                  @click="confirmDelete(item)"
-                />
-              </Dropdown>
-            </div>
-            <!-- Desktop: Buttons -->
-            <div class="hidden shrink-0 gap-2 sm:flex">
-              <template v-if="!item.is_paid && item.recurrence_period !== 'one-time'">
-                <Button
-                  v-if="item.is_paused"
-                  variant="outline"
-                  size="sm"
-                  @click="handleTogglePause(item)"
-                >
-                  Nastavi
-                </Button>
-                <Button
-                  v-else
-                  variant="secondary"
-                  size="sm"
-                  @click="handleTogglePause(item)"
-                >
-                  Pauziraj
-                </Button>
-              </template>
-              <template v-if="!item.is_paid && !item.is_paused">
-                <Button
-                  variant="success"
-                  size="sm"
-                  @click="markPaid(item)"
-                >
-                  Plaćeno
-                </Button>
-              </template>
-              <Button
-                v-if="item.recurrence_period !== 'one-time'"
-                variant="outline"
-                size="sm"
-                @click="openHistory(item)"
-              >
-                <ClockIcon class="mr-1 h-4 w-4" />
-                Istorija
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                @click="openEdit(item)"
-              >
-                <PencilIcon class="mr-1 h-4 w-4" />
-                Izmeni
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                @click="confirmDelete(item)"
-              >
-                <TrashIcon class="mr-1 h-4 w-4" />
-                Obriši
-              </Button>
-            </div>
-          </template>
-        </div>
+        <PaymentsPaymentListItem
+          :item="item"
+          @mark-paid="markPaid($event)"
+          @toggle-pause="handleTogglePause($event)"
+          @open-history="openHistory($event)"
+          @edit="openEdit($event)"
+          @delete="confirmDelete($event)"
+          @undo="confirmUndo($event)"
+        />
       </li>
     </ul>
 
@@ -309,123 +107,39 @@
       </template>
     </div>
 
-    <Dialog
+    <PaymentFormDialog
       v-model:open="dialogOpen"
-      title-id="payment-dialog-title"
-    >
-      <DialogHeader>
-        <h2
-          id="payment-dialog-title"
-          class="text-lg font-semibold"
-        >
-          {{ editingPayment ? 'Izmeni plaćanje' : 'Dodaj plaćanje' }}
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <PaymentForm
-          :payment="editingPayment"
-          :has-history="editingHasHistory"
-          @submit="onFormSubmit"
-          @cancel="dialogOpen = false"
-        />
-      </DialogContent>
-    </Dialog>
-
-    <Dialog
+      :payment="editingPayment"
+      :has-history="editingHasHistory"
+      @submit="onFormSubmit"
+      @cancel="dialogOpen = false"
+    />
+    <ConfirmDialog
       v-model:open="deleteDialogOpen"
-      title-id="delete-payment-title"
-    >
-      <DialogHeader>
-        <h2
-          id="delete-payment-title"
-          class="text-lg font-semibold"
-        >
-          Obriši plaćanje
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <p class="text-gray-600">
-          Da li ste sigurni da želite da obrišete „{{ paymentToDelete?.name }}"?
-        </p>
-      </DialogContent>
-      <DialogFooter>
-        <Button
-          variant="outline"
-          @click="deleteDialogOpen = false"
-        >
-          Otkaži
-        </Button>
-        <Button
-          variant="destructive"
-          :disabled="deleting"
-          @click="doDelete"
-        >
-          Obriši
-        </Button>
-      </DialogFooter>
-    </Dialog>
-
-    <Dialog
+      title="Obriši plaćanje"
+      :message="deleteConfirmMessage"
+      :loading="deleting"
+      @confirm="doDelete"
+    />
+    <PaymentUndoDialog
       v-model:open="undoDialogOpen"
-      title-id="undo-payment-title"
-    >
-      <DialogHeader>
-        <h2
-          id="undo-payment-title"
-          class="text-lg font-semibold"
-        >
-          Poništi plaćanje
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <p class="text-gray-600">
-          Da li ste sigurni da želite da poništite poslednje plaćanje za „{{
-            historyToUndo?.name
-          }}"?
-        </p>
-        <p class="mt-2 text-sm text-gray-500">
-          Ovo će obrisati zapis iz istorije i vratiti datum dospeća na prethodni mesec.
-        </p>
-      </DialogContent>
-      <DialogFooter>
-        <Button
-          variant="outline"
-          @click="undoDialogOpen = false"
-        >
-          Otkaži
-        </Button>
-        <Button
-          variant="destructive"
-          :disabled="undoing"
-          @click="doUndo"
-        >
-          Poništi
-        </Button>
-      </DialogFooter>
-    </Dialog>
+      :payment-name="historyToUndo?.name ?? ''"
+      :loading="undoing"
+      @confirm="doUndo"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import {
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  CheckIcon,
-  PlayIcon,
-  PauseIcon,
-  ArrowUturnLeftIcon,
-  ClockIcon,
-} from '@heroicons/vue/24/outline';
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import type { Payment, PaymentHistory, RecurrencePeriod } from '~/types/database';
 import { Button } from '~/components/ui/button';
-import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
-import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
-import PaymentForm from '~/components/payments/PaymentForm.vue';
+import ConfirmDialog from '~/components/ui/ConfirmDialog.vue';
+import PaymentFormDialog from '~/components/payments/PaymentFormDialog.vue';
 import PaymentHistoryPopup from '~/components/payments/PaymentHistoryPopup.vue';
+import PaymentUndoDialog from '~/components/payments/PaymentUndoDialog.vue';
 import { formatAmount } from '~/utils/format';
 import {
-  formatDate,
   isOverdue,
   getDueDateInMonth,
   currentMonthYYYYMM,
@@ -646,8 +360,7 @@ const displayedList = computed<ListItem[]>(() => {
   if (!hidePaid.value) return combinedList.value;
   return combinedList.value.filter((item) => {
     if (item.type === 'history') return false;
-    if (item.type === 'payment' && item.is_paid) return false;
-    return true;
+    return !(item.type === 'payment' && item.is_paid);
   });
 });
 
@@ -655,6 +368,10 @@ const emptyListMessage = computed(() => {
   if (combinedList.value.length === 0) return 'Nema plaćanja za prikaz.';
   return 'Nema neplaćenih plaćanja. Sve stavke su plaćene ili ih sakriva filter „Sakrij plaćena".';
 });
+
+const deleteConfirmMessage = computed(
+  () => `Da li ste sigurni da želite da obrišete „${paymentToDelete.value?.name ?? ''}"?`,
+);
 
 // Summary computed properties
 const summary = computed(() => {

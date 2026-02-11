@@ -41,117 +41,34 @@
         />
       </div>
 
-      <!-- Event Dialog (Add/Edit) -->
-      <Dialog
+      <EventFormDialog
         v-model:open="eventDialogOpen"
-        title-id="event-dialog-title"
-      >
-        <DialogHeader>
-          <h2
-            id="event-dialog-title"
-            class="text-lg font-semibold"
-          >
-            {{ editingEvent ? 'Izmeni događaj' : 'Dodaj događaj' }}
-          </h2>
-        </DialogHeader>
-        <DialogContent>
-          <div
-            v-if="eventError"
-            class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
-          >
-            {{ eventError }}
-          </div>
-          <EventForm
-            :event="editingEvent"
-            @submit="onEventSubmit"
-            @cancel="eventDialogOpen = false"
-          />
-        </DialogContent>
-      </Dialog>
-
-      <!-- Payment Dialog (Add/Edit) -->
-      <Dialog
+        :event="editingEvent"
+        :error="eventError"
+        @submit="onEventSubmit"
+        @cancel="eventDialogOpen = false"
+      />
+      <PaymentFormDialog
         v-model:open="paymentDialogOpen"
-        title-id="payment-dialog-title"
-      >
-        <DialogHeader>
-          <h2
-            id="payment-dialog-title"
-            class="text-lg font-semibold"
-          >
-            {{ editingPayment ? 'Izmeni plaćanje' : 'Dodaj plaćanje' }}
-          </h2>
-        </DialogHeader>
-        <DialogContent>
-          <div
-            v-if="paymentError"
-            class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
-          >
-            {{ paymentError }}
-          </div>
-          <PaymentForm
-            :payment="editingPayment"
-            @submit="onPaymentSubmit"
-            @cancel="paymentDialogOpen = false"
-          />
-        </DialogContent>
-      </Dialog>
-
-      <!-- Birthday Dialog (Add/Edit) -->
-      <Dialog
+        :payment="editingPayment"
+        :error="paymentError"
+        @submit="onPaymentSubmit"
+        @cancel="paymentDialogOpen = false"
+      />
+      <BirthdayFormDialog
         v-model:open="birthdayDialogOpen"
-        title-id="birthday-dialog-title"
-      >
-        <DialogHeader>
-          <h2
-            id="birthday-dialog-title"
-            class="text-lg font-semibold"
-          >
-            {{ editingBirthday ? 'Izmeni rođendan' : 'Dodaj rođendan' }}
-          </h2>
-        </DialogHeader>
-        <DialogContent>
-          <div
-            v-if="birthdayError"
-            class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
-          >
-            {{ birthdayError }}
-          </div>
-          <BirthdayForm
-            :birthday="editingBirthday"
-            @submit="onBirthdaySubmit"
-            @cancel="birthdayDialogOpen = false"
-          />
-        </DialogContent>
-      </Dialog>
-
-      <!-- Expense Dialog (Add/Edit) -->
-      <Dialog
+        :birthday="editingBirthday"
+        :error="birthdayError"
+        @submit="onBirthdaySubmit"
+        @cancel="birthdayDialogOpen = false"
+      />
+      <ExpenseFormDialog
         v-model:open="expenseDialogOpen"
-        title-id="expense-dialog-title"
-      >
-        <DialogHeader>
-          <h2
-            id="expense-dialog-title"
-            class="text-lg font-semibold"
-          >
-            {{ editingExpense ? 'Izmeni trošak' : 'Dodaj trošak' }}
-          </h2>
-        </DialogHeader>
-        <DialogContent>
-          <div
-            v-if="expenseError"
-            class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
-          >
-            {{ expenseError }}
-          </div>
-          <ExpenseForm
-            :expense="editingExpense"
-            @submit="onExpenseSubmit"
-            @cancel="expenseDialogOpen = false"
-          />
-        </DialogContent>
-      </Dialog>
+        :expense="editingExpense"
+        :error="expenseError"
+        @submit="onExpenseSubmit"
+        @cancel="expenseDialogOpen = false"
+      />
     </div>
   </PullToRefresh>
 </template>
@@ -162,11 +79,10 @@ import DashboardEventCard from '~/components/dashboard/DashboardEventCard.vue';
 import DashboardPaymentCard from '~/components/dashboard/DashboardPaymentCard.vue';
 import DashboardBirthdayCard from '~/components/dashboard/DashboardBirthdayCard.vue';
 import DashboardExpenseCard from '~/components/dashboard/DashboardExpenseCard.vue';
-import EventForm from '~/components/events/EventForm.vue';
-import PaymentForm from '~/components/payments/PaymentForm.vue';
-import BirthdayForm from '~/components/birthdays/BirthdayForm.vue';
-import ExpenseForm from '~/components/expenses/ExpenseForm.vue';
-import { Dialog, DialogHeader, DialogContent } from '~/components/ui/dialog';
+import EventFormDialog from '~/components/events/EventFormDialog.vue';
+import PaymentFormDialog from '~/components/payments/PaymentFormDialog.vue';
+import BirthdayFormDialog from '~/components/birthdays/BirthdayFormDialog.vue';
+import ExpenseFormDialog from '~/components/expenses/ExpenseFormDialog.vue';
 import { useEvents } from '~/composables/useEvents';
 import { usePayments } from '~/composables/usePayments';
 import { useBirthdays } from '~/composables/useBirthdays';

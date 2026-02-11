@@ -50,152 +50,38 @@
         class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
         :class="{ 'opacity-60': e.is_paid }"
       >
-        <div class="flex flex-wrap items-start gap-3 sm:flex-nowrap">
-          <!-- Drag handle -->
-          <div
-            class="drag-handle flex cursor-grab items-center py-2 text-gray-400 active:cursor-grabbing dark:text-gray-500"
-          >
-            <Bars3Icon class="h-5 w-5" />
-          </div>
-
-          <!-- Content -->
-          <div class="min-w-0 flex-1">
-            <p class="font-medium text-gray-900 dark:text-gray-100">{{ e.name }}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-400">{{ formatAmount(e.amount) }}</p>
-            <p
-              v-if="e.description"
-              class="mt-1 text-sm text-gray-500 dark:text-gray-400"
-            >
-              {{ e.description }}
-            </p>
-            <p
-              v-if="e.is_paid && e.paid_date"
-              class="mt-1 text-sm text-gray-500 dark:text-gray-400"
-            >
-              Kupljeno {{ formatDate(e.paid_date) }}
-            </p>
-          </div>
-
-          <!-- Mobile: Dropdown menu -->
-          <div class="flex shrink-0 sm:hidden">
-            <Dropdown>
-              <DropdownItem
-                v-if="!e.is_paid"
-                label="Označi kao plaćeno"
-                :icon="CheckIcon"
-                @click="markPaid(e)"
-              />
-              <DropdownItem
-                label="Izmeni"
-                :icon="PencilIcon"
-                @click="openEdit(e)"
-              />
-              <DropdownItem
-                label="Obriši"
-                :icon="TrashIcon"
-                variant="destructive"
-                @click="confirmDelete(e)"
-              />
-            </Dropdown>
-          </div>
-
-          <!-- Desktop: Regular buttons -->
-          <div class="hidden shrink-0 gap-2 sm:flex">
-            <template v-if="!e.is_paid">
-              <Button
-                size="sm"
-                @click="markPaid(e)"
-              >
-                Plaćeno
-              </Button>
-            </template>
-            <Button
-              variant="outline"
-              size="sm"
-              @click="openEdit(e)"
-            >
-              <PencilIcon class="mr-1 h-4 w-4" />
-              Izmeni
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              @click="confirmDelete(e)"
-            >
-              <TrashIcon class="mr-1 h-4 w-4" />
-              Obriši
-            </Button>
-          </div>
-        </div>
+        <ExpensesExpenseListItem
+          :expense="e"
+          @mark-paid="markPaid($event)"
+          @edit="openEdit($event)"
+          @delete="confirmDelete($event)"
+        />
       </li>
     </ul>
 
-    <Dialog
+    <ExpenseFormDialog
       v-model:open="dialogOpen"
-      title-id="expense-dialog-title"
-    >
-      <DialogHeader>
-        <h2
-          id="expense-dialog-title"
-          class="text-lg font-semibold"
-        >
-          {{ editingExpense ? 'Izmeni trošak' : 'Dodaj trošak' }}
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <ExpenseForm
-          :expense="editingExpense"
-          @submit="onFormSubmit"
-          @cancel="dialogOpen = false"
-        />
-      </DialogContent>
-    </Dialog>
-
-    <Dialog
+      :expense="editingExpense"
+      @submit="onFormSubmit"
+      @cancel="dialogOpen = false"
+    />
+    <ConfirmDialog
       v-model:open="deleteDialogOpen"
-      title-id="delete-expense-title"
-    >
-      <DialogHeader>
-        <h2
-          id="delete-expense-title"
-          class="text-lg font-semibold"
-        >
-          Obriši trošak
-        </h2>
-      </DialogHeader>
-      <DialogContent>
-        <p class="text-gray-600">
-          Da li ste sigurni da želite da obrišete „{{ expenseToDelete?.name }}"?
-        </p>
-      </DialogContent>
-      <DialogFooter>
-        <Button
-          variant="outline"
-          @click="deleteDialogOpen = false"
-        >
-          Otkaži
-        </Button>
-        <Button
-          variant="destructive"
-          :disabled="deleting"
-          @click="doDelete"
-        >
-          Obriši
-        </Button>
-      </DialogFooter>
-    </Dialog>
+      title="Obriši trošak"
+      :message="deleteConfirmMessage"
+      :loading="deleting"
+      @confirm="doDelete"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { Sortable } from 'sortablejs';
-import { PlusIcon, PencilIcon, TrashIcon, Bars3Icon, CheckIcon } from '@heroicons/vue/24/outline';
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import type { Expense } from '~/types/database';
 import { Button } from '~/components/ui/button';
-import { Dialog, DialogHeader, DialogContent, DialogFooter } from '~/components/ui/dialog';
-import { Dropdown, DropdownItem } from '~/components/ui/dropdown';
-import ExpenseForm from '~/components/expenses/ExpenseForm.vue';
-import { formatDate } from '~/utils/date';
+import ConfirmDialog from '~/components/ui/ConfirmDialog.vue';
+import ExpenseFormDialog from '~/components/expenses/ExpenseFormDialog.vue';
 import { formatAmount } from '~/utils/format';
 import { useExpenses } from '~/composables/useExpenses';
 import { useProfile } from '~/composables/useProfile';
@@ -219,6 +105,10 @@ let sortableInstance: Sortable | null = null;
 
 const unpaidTotal = computed(() =>
   expenses.value.filter((e) => !e.is_paid).reduce((sum, e) => sum + Number(e.amount), 0),
+);
+
+const deleteConfirmMessage = computed(
+  () => `Da li ste sigurni da želite da obrišete „${expenseToDelete.value?.name ?? ''}"?`,
 );
 
 async function loadExpenses(): Promise<void> {
