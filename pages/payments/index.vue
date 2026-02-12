@@ -8,7 +8,7 @@
       </Button>
     </div>
 
-    <!-- Month filter + Sakrij plaćena -->
+    <!-- Month filter + Hide paid -->
     <div class="mt-4 flex flex-wrap items-center gap-4">
       <div class="flex flex-wrap gap-2">
         <Button
@@ -355,7 +355,7 @@ const combinedList = computed<ListItem[]>(() => {
   return items;
 });
 
-// When "Sakrij plaćena" is on, hide payment rows that are paid and all history rows
+// When "Hide paid" filter is on, hide payment rows that are paid and all history rows
 const displayedList = computed<ListItem[]>(() => {
   if (!hidePaid.value) return combinedList.value;
   return combinedList.value.filter((item) => {

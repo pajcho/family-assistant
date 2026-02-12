@@ -113,7 +113,7 @@
                 {{ selectedPayment.remaining_occurrences }} rata
               </dd>
             </div>
-            <!-- Link akcije: Istorija levo, Označi kao plaćeno desno -->
+            <!-- Action links: History on the left, Mark as paid on the right -->
             <div class="flex justify-between border-t border-gray-200 pt-2 dark:border-gray-600">
               <button
                 type="button"
@@ -196,7 +196,7 @@ function openHistory(): void {
   historyOpen.value = true;
 }
 
-// Kad se zatvori istorija, ponovo otvori detalje
+// When history popup is closed, open details again
 watch(historyOpen, (isOpen, wasOpen) => {
   if (wasOpen && !isOpen && selectedPayment.value) {
     detailOpen.value = true;

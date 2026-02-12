@@ -31,7 +31,7 @@ import { formatDate } from '~/utils/date';
 interface Props {
   name: string;
   birthDate: string;
-  /** Kad true, ne prikazuje "za X dana" (koristi se kad se dani prikazuju posebno desno). */
+  /** When true, do not show "in X days" (used when days are displayed separately on the right). */
   hideDays?: boolean;
 }
 
