@@ -5,12 +5,12 @@ export function useEvents() {
   const { familyId } = useProfile();
 
   async function fetchEvents(from?: string, to?: string): Promise<Event[]> {
-    const fid = familyId.value;
-    if (!fid) return [];
+    const familyIdValue = familyId.value;
+    if (!familyIdValue) return [];
     let q = supabase
       .from('events')
       .select('*')
-      .eq('family_id', fid)
+      .eq('family_id', familyIdValue)
       .order('date', { ascending: true })
       .order('start_time', { ascending: true });
     if (from) q = q.gte('date', from);
@@ -19,15 +19,15 @@ export function useEvents() {
     if (error) return [];
     const list = (data as Event[]) ?? [];
     // All-day events (null start_time) first per day, then by start_time
-    return list.toSorted((a, b) => {
-      const d = a.date.localeCompare(b.date);
-      if (d !== 0) return d;
-      const aNull = a.start_time == null;
-      const bNull = b.start_time == null;
+    return list.toSorted((eventA, eventB) => {
+      const dateCompare = eventA.date.localeCompare(eventB.date);
+      if (dateCompare !== 0) return dateCompare;
+      const aNull = eventA.start_time == null;
+      const bNull = eventB.start_time == null;
       if (aNull && !bNull) return -1;
       if (!aNull && bNull) return 1;
       if (aNull && bNull) return 0;
-      return (a.start_time ?? '').localeCompare(b.start_time ?? '');
+      return (eventA.start_time ?? '').localeCompare(eventB.start_time ?? '');
     });
   }
 
@@ -39,11 +39,11 @@ export function useEvents() {
     end_time?: string | null;
     notes?: string;
   }): Promise<{ data: Event | null; error: Error | null }> {
-    const fid = familyId.value;
-    if (!fid) return { data: null, error: new Error('Nema porodice') };
+    const familyIdValue = familyId.value;
+    if (!familyIdValue) return { data: null, error: new Error('Nema porodice') };
     const { data, error } = await supabase
       .from('events')
-      .insert({ family_id: fid, ...payload })
+      .insert({ family_id: familyIdValue, ...payload })
       .select()
       .single();
     return { data: data as Event | null, error: error as Error | null };

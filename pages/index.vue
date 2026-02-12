@@ -271,33 +271,33 @@ async function onExpenseSubmit(payload: {
 
 // Load data functions
 async function loadEvents(): Promise<void> {
-  const fid = familyId.value;
-  if (!fid) return;
-  const { data } = await supabase.from('events').select('*').eq('family_id', fid);
+  const familyIdValue = familyId.value;
+  if (!familyIdValue) return;
+  const { data } = await supabase.from('events').select('*').eq('family_id', familyIdValue);
   allEvents.value = (data as Event[]) ?? [];
 }
 
 async function loadPayments(): Promise<void> {
-  const fid = familyId.value;
-  if (!fid) return;
-  const { data } = await supabase.from('payments').select('*').eq('family_id', fid);
+  const familyIdValue = familyId.value;
+  if (!familyIdValue) return;
+  const { data } = await supabase.from('payments').select('*').eq('family_id', familyIdValue);
   allPayments.value = (data as Payment[]) ?? [];
 }
 
 async function loadBirthdays(): Promise<void> {
-  const fid = familyId.value;
-  if (!fid) return;
-  const { data } = await supabase.from('birthdays').select('*').eq('family_id', fid);
+  const familyIdValue = familyId.value;
+  if (!familyIdValue) return;
+  const { data } = await supabase.from('birthdays').select('*').eq('family_id', familyIdValue);
   allBirthdays.value = (data as Birthday[]) ?? [];
 }
 
 async function loadExpenses(): Promise<void> {
-  const fid = familyId.value;
-  if (!fid) return;
+  const familyIdValue = familyId.value;
+  if (!familyIdValue) return;
   const { data } = await supabase
     .from('expenses')
     .select('*')
-    .eq('family_id', fid)
+    .eq('family_id', familyIdValue)
     .order('sort_order', { ascending: true });
   allExpenses.value = (data as Expense[]) ?? [];
 }

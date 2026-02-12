@@ -150,8 +150,8 @@ function daysLabel(birthDate: string): string {
   return `za ${days} dana`;
 }
 
-function openDetail(b: Birthday): void {
-  selectedBirthday.value = b;
+function openDetail(birthday: Birthday): void {
+  selectedBirthday.value = birthday;
   detailOpen.value = true;
 }
 </script>

@@ -6,12 +6,12 @@ export function usePayments() {
   const { familyId } = useProfile();
 
   async function fetchPayments(hidePaid = false): Promise<Payment[]> {
-    const fid = familyId.value;
-    if (!fid) return [];
+    const familyIdValue = familyId.value;
+    if (!familyIdValue) return [];
     let q = supabase
       .from('payments')
       .select('*')
-      .eq('family_id', fid)
+      .eq('family_id', familyIdValue)
       .order('due_date', { ascending: true });
     if (hidePaid) q = q.eq('is_paid', false);
     const { data, error } = await q;
@@ -20,12 +20,12 @@ export function usePayments() {
   }
 
   async function fetchPaymentHistory(monthFilter?: string): Promise<PaymentHistory[]> {
-    const fid = familyId.value;
-    if (!fid) return [];
+    const familyIdValue = familyId.value;
+    if (!familyIdValue) return [];
     let q = supabase
       .from('payment_history')
       .select('*')
-      .eq('family_id', fid)
+      .eq('family_id', familyIdValue)
       .order('due_date', { ascending: true });
     if (monthFilter) {
       // Filter by month: monthFilter is "YYYY-MM" format
@@ -69,12 +69,12 @@ export function usePayments() {
     recurrence_period: RecurrencePeriod | null;
     remaining_occurrences?: number | null;
   }): Promise<{ data: Payment | null; error: Error | null }> {
-    const fid = familyId.value;
-    if (!fid) return { data: null, error: new Error('Nema porodice') };
+    const familyIdValue = familyId.value;
+    if (!familyIdValue) return { data: null, error: new Error('Nema porodice') };
     const { data, error } = await supabase
       .from('payments')
       .insert({
-        family_id: fid,
+        family_id: familyIdValue,
         ...payload,
         is_paid: false,
         paid_date: null,

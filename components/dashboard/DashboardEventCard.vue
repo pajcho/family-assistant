@@ -144,8 +144,8 @@ function eventDateLabel(dateStr: string): string {
   return `za ${diff} dana`;
 }
 
-function openDetail(e: Event): void {
-  selectedEvent.value = e;
+function openDetail(eventItem: Event): void {
+  selectedEvent.value = eventItem;
   detailOpen.value = true;
 }
 </script>

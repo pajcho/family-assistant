@@ -105,8 +105,8 @@ function openAdd(): void {
   dialogOpen.value = true;
 }
 
-function openEdit(b: Birthday): void {
-  editingBirthday.value = b;
+function openEdit(birthday: Birthday): void {
+  editingBirthday.value = birthday;
   errorMessage.value = '';
   dialogOpen.value = true;
 }
@@ -136,8 +136,8 @@ async function onFormSubmit(payload: {
   }
 }
 
-function confirmDelete(b: Birthday): void {
-  birthdayToDelete.value = b;
+function confirmDelete(birthday: Birthday): void {
+  birthdayToDelete.value = birthday;
   deleteDialogOpen.value = true;
 }
 

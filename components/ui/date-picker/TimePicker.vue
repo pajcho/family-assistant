@@ -55,9 +55,9 @@ function normalizeTimeString(value: string | null | undefined): string {
   if (!trimmed) return '';
   const match = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(trimmed);
   if (!match) return trimmed;
-  const h = Math.min(23, Math.max(0, Number.parseInt(match[1], 10)));
-  const m = Math.min(59, Math.max(0, Number.parseInt(match[2], 10)));
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  const hours = Math.min(23, Math.max(0, Number.parseInt(match[1], 10)));
+  const minutes = Math.min(59, Math.max(0, Number.parseInt(match[2], 10)));
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }
 
 const displayValue = computed(() => normalizeTimeString(props.modelValue));

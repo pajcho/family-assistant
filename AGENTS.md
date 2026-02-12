@@ -4,6 +4,9 @@
 
 - **Package manager:** `pnpm`
 - **Format/lint:** `pnpm fmt`, `pnpm lint`, `pnpm check` (oxfmt + oxlint; not ESLint/Prettier)
+- **After every change:** run `pnpm check` to verify format and linting are ok.
+- **Code language:** All comments, variable names, and function names must be in English.
+- **Naming:** Use readable, meaningful names for variables and function parameters; avoid single-letter or cryptic abbreviations (e.g. prefer `payment` over `p`, `selectedMonthValue` over `sel`). Names should not be excessively long.
 
 When making plans, follow [Plan mode](docs/agents/plan-mode.md).
 

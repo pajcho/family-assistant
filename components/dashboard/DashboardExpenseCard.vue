@@ -136,11 +136,11 @@ function handleEdit(): void {
 
 // Filter unpaid expenses
 const unpaidExpenses = computed(() => {
-  return props.expenses.filter((e) => !e.is_paid);
+  return props.expenses.filter((expense) => !expense.is_paid);
 });
 
-function openDetail(e: Expense): void {
-  selectedExpense.value = e;
+function openDetail(expense: Expense): void {
+  selectedExpense.value = expense;
   detailOpen.value = true;
 }
 </script>

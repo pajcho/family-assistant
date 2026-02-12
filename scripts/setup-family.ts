@@ -50,30 +50,33 @@ if (!url || !serviceRoleKey) {
 
 const supabase = createClient(url, serviceRoleKey, { auth: { autoRefreshToken: false } });
 
-function ask(rl: readline.Interface, prompt: string): Promise<string> {
+function ask(readInterface: readline.Interface, prompt: string): Promise<string> {
   return new Promise((resolve) => {
-    rl.question(prompt, (answer) => resolve((answer ?? '').trim()));
+    readInterface.question(prompt, (answer) => resolve((answer ?? '').trim()));
   });
 }
 
 async function main(): Promise<void> {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const readInterface = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
 
   console.log('Porodični asistent – kreiranje porodice i korisnika\n');
 
-  const familyName = await ask(rl, 'Naziv porodice: ');
+  const familyName = await ask(readInterface, 'Naziv porodice: ');
   if (!familyName) {
     console.error('Naziv porodice je obavezan.');
-    rl.close();
+    readInterface.close();
     process.exit(1);
   }
 
-  const email1 = await ask(rl, 'Email korisnika 1: ');
-  const password1 = await ask(rl, 'Lozinka korisnika 1: ');
-  const email2 = await ask(rl, 'Email korisnika 2: ');
-  const password2 = await ask(rl, 'Lozinka korisnika 2: ');
+  const email1 = await ask(readInterface, 'Email korisnika 1: ');
+  const password1 = await ask(readInterface, 'Lozinka korisnika 1: ');
+  const email2 = await ask(readInterface, 'Email korisnika 2: ');
+  const password2 = await ask(readInterface, 'Lozinka korisnika 2: ');
 
-  rl.close();
+  readInterface.close();
 
   if (!email1 || !password1) {
     console.error('Sva polja (email i lozinka za prvog korisnika) su obavezna.');
@@ -117,9 +120,9 @@ async function main(): Promise<void> {
   }
 
   console.log('Povezivanje profila sa porodicom...');
-  for (const uid of userIds) {
+  for (const userId of userIds) {
     const { error: profileErr } = await supabase.from('profiles').insert({
-      id: uid,
+      id: userId,
       family_id: familyId,
     });
     if (profileErr) {

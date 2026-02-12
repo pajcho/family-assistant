@@ -251,98 +251,110 @@ const monthFilters = computed(() => {
 
 // Create a map of payment names by ID for history entries
 const paymentNameMap = computed(() => {
-  const map = new Map<string, string>();
-  for (const p of allPayments.value) {
-    map.set(p.id, p.name);
+  const nameById = new Map<string, string>();
+  for (const payment of allPayments.value) {
+    nameById.set(payment.id, payment.name);
   }
-  return map;
+  return nameById;
 });
 
-function getLimitedMonths(p: Payment): string[] {
-  return getLimitedMonthsFromDate(p.due_date, Math.max(0, p.remaining_occurrences ?? 0));
+function getLimitedMonths(payment: Payment): string[] {
+  return getLimitedMonthsFromDate(
+    payment.due_date,
+    Math.max(0, payment.remaining_occurrences ?? 0),
+  );
 }
 
 // Combined and filtered list
 const combinedList = computed<ListItem[]>(() => {
   const items: ListItem[] = [];
-  const sel = selectedMonth.value;
+  const selectedMonthValue = selectedMonth.value;
   const currentMonth = currentMonthYYYYMM();
 
   // Add payments (real rows: due in this month)
-  for (const p of allPayments.value) {
-    if (sel !== 'all' && !p.due_date.startsWith(sel)) continue;
-    items.push({ ...p, type: 'payment' });
+  for (const payment of allPayments.value) {
+    if (selectedMonthValue !== 'all' && !payment.due_date.startsWith(selectedMonthValue)) continue;
+    items.push({ ...payment, type: 'payment' });
   }
 
   // Add history entries (only when filtering by month)
   // Skip history for one-time payments due in this month — they are already shown as payment rows
-  if (sel !== 'all') {
+  if (selectedMonthValue !== 'all') {
     const oneTimePaymentIdsInMonth = new Set(
       allPayments.value
-        .filter((p) => p.recurrence_period === 'one-time' && p.due_date.startsWith(sel))
-        .map((p) => p.id),
+        .filter(
+          (payment) =>
+            payment.recurrence_period === 'one-time' &&
+            payment.due_date.startsWith(selectedMonthValue),
+        )
+        .map((payment) => payment.id),
     );
     const lastHistoryByPayment = new Map<string, { id: string; paid_date: string }>();
-    for (const h of allHistory.value) {
-      const existing = lastHistoryByPayment.get(h.payment_id);
-      if (!existing || h.paid_date > existing.paid_date) {
-        lastHistoryByPayment.set(h.payment_id, { id: h.id, paid_date: h.paid_date });
+    for (const historyEntry of allHistory.value) {
+      const existing = lastHistoryByPayment.get(historyEntry.payment_id);
+      if (!existing || historyEntry.paid_date > existing.paid_date) {
+        lastHistoryByPayment.set(historyEntry.payment_id, {
+          id: historyEntry.id,
+          paid_date: historyEntry.paid_date,
+        });
       }
     }
-    for (const h of allHistory.value) {
-      if (!h.due_date.startsWith(sel)) continue;
-      if (oneTimePaymentIdsInMonth.has(h.payment_id)) continue;
+    for (const historyEntry of allHistory.value) {
+      if (!historyEntry.due_date.startsWith(selectedMonthValue)) continue;
+      if (oneTimePaymentIdsInMonth.has(historyEntry.payment_id)) continue;
       items.push({
         type: 'history',
-        id: h.id,
-        payment_id: h.payment_id,
-        name: paymentNameMap.value.get(h.payment_id) ?? 'Nepoznato plaćanje',
-        amount: h.amount,
-        due_date: h.due_date,
-        paid_date: h.paid_date,
-        isLast: lastHistoryByPayment.get(h.payment_id)?.id === h.id,
+        id: historyEntry.id,
+        payment_id: historyEntry.payment_id,
+        name: paymentNameMap.value.get(historyEntry.payment_id) ?? 'Nepoznato plaćanje',
+        amount: historyEntry.amount,
+        due_date: historyEntry.due_date,
+        paid_date: historyEntry.paid_date,
+        isLast: lastHistoryByPayment.get(historyEntry.payment_id)?.id === historyEntry.id,
       });
     }
 
     // Add upcoming rows for current/future months (informational only).
     // Do not add upcoming for a payment if that month's instance was already paid (has history entry).
-    if (sel >= currentMonth) {
+    if (selectedMonthValue >= currentMonth) {
       const paymentIdsWithHistoryInMonth = new Set(
-        allHistory.value.filter((h) => h.due_date.startsWith(sel)).map((h) => h.payment_id),
+        allHistory.value
+          .filter((historyEntry) => historyEntry.due_date.startsWith(selectedMonthValue))
+          .map((historyEntry) => historyEntry.payment_id),
       );
-      for (const p of allPayments.value) {
-        if (p.is_paid || p.is_paused) continue;
-        if (paymentIdsWithHistoryInMonth.has(p.id)) continue; // already paid this month
-        const period = p.recurrence_period;
-        const hasRealRow = p.due_date.startsWith(sel);
+      for (const payment of allPayments.value) {
+        if (payment.is_paid || payment.is_paused) continue;
+        if (paymentIdsWithHistoryInMonth.has(payment.id)) continue; // already paid this month
+        const period = payment.recurrence_period;
+        const hasRealRow = payment.due_date.startsWith(selectedMonthValue);
 
         if (period === 'monthly') {
           if (!hasRealRow) {
             items.push({
               type: 'upcoming',
-              id: `upcoming-${p.id}-${sel}`,
-              paymentId: p.id,
-              name: p.name,
-              amount: p.amount,
-              due_date: getDueDateInMonth(sel, p.due_date),
-              description: p.description,
-              recurrence_period: p.recurrence_period,
-              remaining_occurrences: p.remaining_occurrences,
+              id: `upcoming-${payment.id}-${selectedMonthValue}`,
+              paymentId: payment.id,
+              name: payment.name,
+              amount: payment.amount,
+              due_date: getDueDateInMonth(selectedMonthValue, payment.due_date),
+              description: payment.description,
+              recurrence_period: payment.recurrence_period,
+              remaining_occurrences: payment.remaining_occurrences,
             });
           }
         } else if (period === 'limited') {
-          const months = getLimitedMonths(p);
-          if (months.includes(sel) && !hasRealRow) {
+          const months = getLimitedMonths(payment);
+          if (months.includes(selectedMonthValue) && !hasRealRow) {
             items.push({
               type: 'upcoming',
-              id: `upcoming-${p.id}-${sel}`,
-              paymentId: p.id,
-              name: p.name,
-              amount: p.amount,
-              due_date: getDueDateInMonth(sel, p.due_date),
-              description: p.description,
-              recurrence_period: p.recurrence_period,
-              remaining_occurrences: p.remaining_occurrences,
+              id: `upcoming-${payment.id}-${selectedMonthValue}`,
+              paymentId: payment.id,
+              name: payment.name,
+              amount: payment.amount,
+              due_date: getDueDateInMonth(selectedMonthValue, payment.due_date),
+              description: payment.description,
+              recurrence_period: payment.recurrence_period,
+              remaining_occurrences: payment.remaining_occurrences,
             });
           }
         }
@@ -351,7 +363,7 @@ const combinedList = computed<ListItem[]>(() => {
     }
   }
 
-  items.sort((a, b) => a.due_date.localeCompare(b.due_date));
+  items.sort((first, second) => first.due_date.localeCompare(second.due_date));
   return items;
 });
 
@@ -378,57 +390,63 @@ const summary = computed(() => {
   if (selectedMonth.value === 'all') {
     // For "all" tab, show total future payments (not paid, not paused)
     const total = allPayments.value
-      .filter((p) => !p.is_paid && !p.is_paused)
-      .reduce((sum, p) => sum + p.amount, 0);
+      .filter((payment) => !payment.is_paid && !payment.is_paused)
+      .reduce((sum, payment) => sum + payment.amount, 0);
     return { type: 'all' as const, total };
   }
 
   // For specific month, show unpaid + paid amounts (unpaid includes real + upcoming for that month)
-  const sel = selectedMonth.value;
+  const selectedMonthValue = selectedMonth.value;
   const currentMonth = currentMonthYYYYMM();
   let unpaidTotal = 0;
   let paidTotal = 0;
 
   // Count payments for this month (real rows)
-  for (const p of allPayments.value) {
-    if (!p.due_date.startsWith(sel)) continue;
-    if (p.is_paused) continue;
-    if (p.is_paid) {
-      paidTotal += p.amount;
+  for (const payment of allPayments.value) {
+    if (!payment.due_date.startsWith(selectedMonthValue)) continue;
+    if (payment.is_paused) continue;
+    if (payment.is_paid) {
+      paidTotal += payment.amount;
     } else {
-      unpaidTotal += p.amount;
+      unpaidTotal += payment.amount;
     }
   }
 
   // Count history entries for this month (skip one-time due in this month — already in payment count)
   const oneTimePaymentIdsInMonth = new Set(
     allPayments.value
-      .filter((p) => p.recurrence_period === 'one-time' && p.due_date.startsWith(sel))
-      .map((p) => p.id),
+      .filter(
+        (payment) =>
+          payment.recurrence_period === 'one-time' &&
+          payment.due_date.startsWith(selectedMonthValue),
+      )
+      .map((payment) => payment.id),
   );
-  for (const h of allHistory.value) {
-    if (!h.due_date.startsWith(sel)) continue;
-    if (oneTimePaymentIdsInMonth.has(h.payment_id)) continue;
-    paidTotal += h.amount;
+  for (const historyEntry of allHistory.value) {
+    if (!historyEntry.due_date.startsWith(selectedMonthValue)) continue;
+    if (oneTimePaymentIdsInMonth.has(historyEntry.payment_id)) continue;
+    paidTotal += historyEntry.amount;
   }
 
   // Include upcoming amounts for this month in unpaid total (same logic as combinedList)
-  if (sel >= currentMonth) {
+  if (selectedMonthValue >= currentMonth) {
     const paymentIdsWithHistoryInMonth = new Set(
-      allHistory.value.filter((h) => h.due_date.startsWith(sel)).map((h) => h.payment_id),
+      allHistory.value
+        .filter((historyEntry) => historyEntry.due_date.startsWith(selectedMonthValue))
+        .map((historyEntry) => historyEntry.payment_id),
     );
-    for (const p of allPayments.value) {
-      if (p.is_paid || p.is_paused) continue;
-      if (paymentIdsWithHistoryInMonth.has(p.id)) continue;
-      const hasRealRow = p.due_date.startsWith(sel);
-      if (p.recurrence_period === 'monthly' && !hasRealRow) {
-        unpaidTotal += p.amount;
+    for (const payment of allPayments.value) {
+      if (payment.is_paid || payment.is_paused) continue;
+      if (paymentIdsWithHistoryInMonth.has(payment.id)) continue;
+      const hasRealRow = payment.due_date.startsWith(selectedMonthValue);
+      if (payment.recurrence_period === 'monthly' && !hasRealRow) {
+        unpaidTotal += payment.amount;
       } else if (
-        p.recurrence_period === 'limited' &&
-        getLimitedMonths(p).includes(sel) &&
+        payment.recurrence_period === 'limited' &&
+        getLimitedMonths(payment).includes(selectedMonthValue) &&
         !hasRealRow
       ) {
-        unpaidTotal += p.amount;
+        unpaidTotal += payment.amount;
       }
     }
   }

@@ -11,14 +11,14 @@
   >
     <template #items>
       <DashboardCardItem
-        v-for="p in duePayments.slice(0, 5)"
-        :key="p.id"
-        :label="p.name"
-        :value="formatAmount(p.amount)"
-        :variant="isOverdue(p.due_date) ? 'red' : 'amber'"
-        :badge-icon="isOverdue(p.due_date) ? ExclamationTriangleIcon : undefined"
-        :badge-icon-title="isOverdue(p.due_date) ? 'Prekoračeno' : undefined"
-        @click="openDetail(p)"
+        v-for="payment in duePayments.slice(0, 5)"
+        :key="payment.id"
+        :label="payment.name"
+        :value="formatAmount(payment.amount)"
+        :variant="isOverdue(payment.due_date) ? 'red' : 'amber'"
+        :badge-icon="isOverdue(payment.due_date) ? ExclamationTriangleIcon : undefined"
+        :badge-icon-title="isOverdue(payment.due_date) ? 'Prekoračeno' : undefined"
+        @click="openDetail(payment)"
       />
       <p
         v-if="duePayments.length > 5"
@@ -219,27 +219,27 @@ const duePayments = computed(() => {
   const today = startOfToday();
   const in7 = addDays(today, 7);
 
-  const unpaid = props.payments.filter((p) => !p.is_paid && !p.is_paused);
+  const unpaid = props.payments.filter((payment) => !payment.is_paid && !payment.is_paused);
   const overdue = unpaid
-    .filter((p) => isOverdue(p.due_date))
+    .filter((payment) => isOverdue(payment.due_date))
     .slice()
-    .toSorted((a, b) => a.due_date.localeCompare(b.due_date));
+    .toSorted((first, second) => first.due_date.localeCompare(second.due_date));
   const upcoming = unpaid
-    .filter((p) => isDateInRange(p.due_date, today, in7))
+    .filter((payment) => isDateInRange(payment.due_date, today, in7))
     .slice()
-    .toSorted((a, b) => a.due_date.localeCompare(b.due_date));
+    .toSorted((first, second) => first.due_date.localeCompare(second.due_date));
 
   return [...overdue, ...upcoming];
 });
 
-function recurrenceLabel(p: Payment): string {
-  if (p.recurrence_period === 'monthly') return 'Mesečno plaćanje';
-  if (p.recurrence_period === 'limited') return 'Plaćanje na rate';
+function recurrenceLabel(payment: Payment): string {
+  if (payment.recurrence_period === 'monthly') return 'Mesečno plaćanje';
+  if (payment.recurrence_period === 'limited') return 'Plaćanje na rate';
   return 'Jednokratno plaćanje';
 }
 
-function openDetail(p: Payment): void {
-  selectedPayment.value = p;
+function openDetail(payment: Payment): void {
+  selectedPayment.value = payment;
   detailOpen.value = true;
 }
 </script>

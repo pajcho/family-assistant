@@ -75,17 +75,17 @@
       class="mt-6 space-y-3"
     >
       <li
-        v-for="ev in filteredEvents"
-        :key="ev.id"
+        v-for="eventItem in filteredEvents"
+        :key="eventItem.id"
         :class="[
           'rounded-lg border p-4 shadow-sm dark:border-gray-700',
-          isEventEnded(ev)
+          isEventEnded(eventItem)
             ? 'border-gray-200/80 bg-gray-50 opacity-75 dark:bg-gray-800/80'
             : 'border-gray-200 bg-white dark:bg-gray-800',
         ]"
       >
         <EventsEventListItem
-          :event="ev"
+          :event="eventItem"
           @edit="openEdit"
           @delete="confirmDelete"
         />
@@ -140,7 +140,7 @@ const errorMessage = ref('');
 
 const filteredEvents = computed(() => {
   if (hideCompleted.value) {
-    return events.value.filter((ev) => !isEventEnded(ev));
+    return events.value.filter((eventItem) => !isEventEnded(eventItem));
   }
   return [...events.value];
 });
@@ -151,8 +151,8 @@ const deleteConfirmMessage = computed(
 
 async function loadEvents(): Promise<void> {
   await fetchProfile();
-  const fid = familyId.value;
-  if (!fid) {
+  const familyIdValue = familyId.value;
+  if (!familyIdValue) {
     loading.value = false;
     return;
   }
@@ -167,8 +167,8 @@ function openAdd(): void {
   dialogOpen.value = true;
 }
 
-function openEdit(ev: Event): void {
-  editingEvent.value = ev;
+function openEdit(eventItem: Event): void {
+  editingEvent.value = eventItem;
   errorMessage.value = '';
   dialogOpen.value = true;
 }
@@ -202,8 +202,8 @@ async function onFormSubmit(
   }
 }
 
-function confirmDelete(ev: Event): void {
-  eventToDelete.value = ev;
+function confirmDelete(eventItem: Event): void {
+  eventToDelete.value = eventItem;
   deleteDialogOpen.value = true;
 }
 

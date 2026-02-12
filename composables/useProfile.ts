@@ -11,12 +11,12 @@ export function useProfile() {
   const familyName = computed(() => family.value?.name ?? null);
 
   async function fetchProfile(): Promise<Profile | null> {
-    const uid = user.value?.id;
-    if (!uid) return null;
+    const userId = user.value?.id;
+    if (!userId) return null;
 
     // Fetch profile if not cached
     if (!profile.value) {
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', uid).single();
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
       if (error) return null;
       profile.value = data as Profile;
     }

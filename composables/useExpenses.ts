@@ -5,12 +5,12 @@ export function useExpenses() {
   const { familyId } = useProfile();
 
   async function fetchExpenses(hidePaid = false): Promise<Expense[]> {
-    const fid = familyId.value;
-    if (!fid) return [];
+    const familyIdValue = familyId.value;
+    if (!familyIdValue) return [];
     let q = supabase
       .from('expenses')
       .select('*')
-      .eq('family_id', fid)
+      .eq('family_id', familyIdValue)
       .order('sort_order', { ascending: true });
     if (hidePaid) q = q.eq('is_paid', false);
     const { data, error } = await q;
@@ -23,14 +23,14 @@ export function useExpenses() {
     description?: string;
     amount: number;
   }): Promise<{ data: Expense | null; error: Error | null }> {
-    const fid = familyId.value;
-    if (!fid) return { data: null, error: new Error('Nema porodice') };
+    const familyIdValue = familyId.value;
+    if (!familyIdValue) return { data: null, error: new Error('Nema porodice') };
 
     // Get max sort_order to add new expense at the end
     const { data: maxData } = await supabase
       .from('expenses')
       .select('sort_order')
-      .eq('family_id', fid)
+      .eq('family_id', familyIdValue)
       .order('sort_order', { ascending: false })
       .limit(1)
       .single();
@@ -39,7 +39,7 @@ export function useExpenses() {
     const { data, error } = await supabase
       .from('expenses')
       .insert({
-        family_id: fid,
+        family_id: familyIdValue,
         ...payload,
         is_paid: false,
         paid_date: null,

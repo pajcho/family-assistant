@@ -52,10 +52,10 @@ const { isDark } = useTheme();
 
 /** Parent uses yyyy-MM-dd; picker shows dd.MM.yyyy. */
 const displayValue = computed(() => {
-  const v = props.modelValue?.trim();
-  if (!v) return '';
-  const d = parseISO(v);
-  return isValid(d) ? format(d, SERBIAN_FORMAT) : v;
+  const trimmedValue = props.modelValue?.trim();
+  if (!trimmedValue) return '';
+  const parsedDate = parseISO(trimmedValue);
+  return isValid(parsedDate) ? format(parsedDate, SERBIAN_FORMAT) : trimmedValue;
 });
 
 function onUpdate(value: string | null | undefined): void {
@@ -63,9 +63,9 @@ function onUpdate(value: string | null | undefined): void {
     emit('update:modelValue', '');
     return;
   }
-  const str = String(value).trim();
-  const d = parse(str, SERBIAN_FORMAT, new Date());
-  emit('update:modelValue', isValid(d) ? format(d, ISO_FORMAT) : '');
+  const trimmedStr = String(value).trim();
+  const parsedDate = parse(trimmedStr, SERBIAN_FORMAT, new Date());
+  emit('update:modelValue', isValid(parsedDate) ? format(parsedDate, ISO_FORMAT) : '');
 }
 
 const inputAttrs = computed(() => ({

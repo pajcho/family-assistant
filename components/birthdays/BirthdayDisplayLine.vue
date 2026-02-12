@@ -41,9 +41,9 @@ const nextAge = computed(() => currentAge(props.birthDate) + 1);
 const dateStr = computed(() => formatDate(props.birthDate));
 const daysUntil = computed(() => daysUntilBirthday(props.birthDate));
 const daysLabel = computed(() => {
-  const d = daysUntil.value;
-  if (d === 0) return 'danas';
-  if (d === 1) return 'sutra';
-  return `za ${d} dana`;
+  const daysCount = daysUntil.value;
+  if (daysCount === 0) return 'danas';
+  if (daysCount === 1) return 'sutra';
+  return `za ${daysCount} dana`;
 });
 </script>

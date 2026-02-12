@@ -157,8 +157,8 @@ function openAdd(): void {
   dialogOpen.value = true;
 }
 
-function openEdit(e: Expense): void {
-  editingExpense.value = e;
+function openEdit(expense: Expense): void {
+  editingExpense.value = expense;
   dialogOpen.value = true;
 }
 
@@ -182,13 +182,13 @@ async function onFormSubmit(payload: {
   }
 }
 
-async function markPaid(e: Expense): Promise<void> {
-  const { error } = await markAsPaid(e.id);
+async function markPaid(expense: Expense): Promise<void> {
+  const { error } = await markAsPaid(expense.id);
   if (!error) await loadExpenses();
 }
 
-function confirmDelete(e: Expense): void {
-  expenseToDelete.value = e;
+function confirmDelete(expense: Expense): void {
+  expenseToDelete.value = expense;
   deleteDialogOpen.value = true;
 }
 

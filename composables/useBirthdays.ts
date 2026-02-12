@@ -5,12 +5,12 @@ export function useBirthdays() {
   const { familyId } = useProfile();
 
   async function fetchBirthdays(): Promise<Birthday[]> {
-    const fid = familyId.value;
-    if (!fid) return [];
+    const familyIdValue = familyId.value;
+    if (!familyIdValue) return [];
     const { data, error } = await supabase
       .from('birthdays')
       .select('*')
-      .eq('family_id', fid)
+      .eq('family_id', familyIdValue)
       .order('birth_date', { ascending: true });
     if (error) return [];
     return (data as Birthday[]) ?? [];
@@ -21,11 +21,11 @@ export function useBirthdays() {
     description?: string;
     birth_date: string;
   }): Promise<{ data: Birthday | null; error: Error | null }> {
-    const fid = familyId.value;
-    if (!fid) return { data: null, error: new Error('Nema porodice') };
+    const familyIdValue = familyId.value;
+    if (!familyIdValue) return { data: null, error: new Error('Nema porodice') };
     const { data, error } = await supabase
       .from('birthdays')
-      .insert({ family_id: fid, ...payload })
+      .insert({ family_id: familyIdValue, ...payload })
       .select()
       .single();
     return { data: data as Birthday | null, error: error as Error | null };

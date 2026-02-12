@@ -47,17 +47,17 @@ export function isUpcoming(dueDateStr: string, withinDays: number): boolean {
 
 /** True if date (YYYY-MM-DD) falls within [from, to] (inclusive, start-of-day). */
 export function isDateInRange(dateStr: string, from: Date, to: Date): boolean {
-  const d = parseDate(dateStr);
+  const date = parseDate(dateStr);
   const fromStart = startOfDay(from);
   const toEnd = startOfDay(to);
-  return !isBefore(d, fromStart) && !isAfter(d, toEnd);
+  return !isBefore(date, fromStart) && !isAfter(date, toEnd);
 }
 
 /** Add one month. Day is capped to last day of target month (e.g. Jan 31 → Feb 28). */
 export function addMonth(dateStr: string): string {
-  const d = parseISO(dateStr + 'T12:00:00');
-  const next = addMonths(d, 1);
-  const day = getDate(d);
+  const date = parseISO(dateStr + 'T12:00:00');
+  const next = addMonths(date, 1);
+  const day = getDate(date);
   const lastDay = getDate(lastDayOfMonth(next));
   const safeDay = Math.min(day, lastDay);
   next.setDate(safeDay);
@@ -66,9 +66,9 @@ export function addMonth(dateStr: string): string {
 
 /** Subtract one month. Day is capped to last day of target month. */
 export function subtractMonth(dateStr: string): string {
-  const d = parseISO(dateStr + 'T12:00:00');
-  const prev = subMonths(d, 1);
-  const day = getDate(d);
+  const date = parseISO(dateStr + 'T12:00:00');
+  const prev = subMonths(date, 1);
+  const day = getDate(date);
   const lastDay = getDate(lastDayOfMonth(prev));
   const safeDay = Math.min(day, lastDay);
   prev.setDate(safeDay);
@@ -77,12 +77,12 @@ export function subtractMonth(dateStr: string): string {
 
 /** Same calendar day in a given month (YYYY-MM). Day capped to last day of month. */
 export function getDueDateInMonth(monthYYYYMM: string, dueDateStr: string): string {
-  const [y, m] = monthYYYYMM.split('-').map(Number);
+  const [year, month] = monthYYYYMM.split('-').map(Number);
   const due = parseISO(dueDateStr + 'T12:00:00');
   const day = getDate(due);
-  const lastDay = getDate(lastDayOfMonth(new Date(y, m - 1, 1)));
+  const lastDay = getDate(lastDayOfMonth(new Date(year, month - 1, 1)));
   const safeDay = Math.min(day, lastDay);
-  return `${y}-${String(m).padStart(2, '0')}-${String(safeDay).padStart(2, '0')}`;
+  return `${year}-${String(month).padStart(2, '0')}-${String(safeDay).padStart(2, '0')}`;
 }
 
 /** Current month as YYYY-MM. */
@@ -93,10 +93,10 @@ export function currentMonthYYYYMM(): string {
 /** For limited payments: list of YYYY-MM for the next `remaining` months starting from due date. */
 export function getLimitedMonths(dueDateStr: string, remaining: number): string[] {
   const months: string[] = [];
-  let d = dueDateStr;
+  let currentMonthStr = dueDateStr;
   for (let i = 0; i < remaining; i++) {
-    months.push(d.slice(0, 7));
-    d = addMonth(d);
+    months.push(currentMonthStr.slice(0, 7));
+    currentMonthStr = addMonth(currentMonthStr);
   }
   return months;
 }
@@ -113,15 +113,15 @@ export function dueDateInCurrentMonth(pastDueDateStr: string): string {
 
 /** Format date as DD.MM.YYYY (Serbian). */
 export function formatDate(date: Date | string): string {
-  const d = typeof date === 'string' ? parseISO(date) : date;
-  return format(d, 'dd.MM.yyyy', { locale: srLocale });
+  const dateObj = typeof date === 'string' ? parseISO(date) : date;
+  return format(dateObj, 'dd.MM.yyyy', { locale: srLocale });
 }
 
 /** 24-hour time HH:mm */
 export function formatTime(time: string): string {
   if (!time) return '';
-  const [h, m] = time.split(':');
-  return `${h.padStart(2, '0')}:${(m ?? '00').padStart(2, '0')}`;
+  const [hoursPart, minutesPart] = time.split(':');
+  return `${hoursPart.padStart(2, '0')}:${(minutesPart ?? '00').padStart(2, '0')}`;
 }
 
 /** Days from first date to second (can be negative). */
