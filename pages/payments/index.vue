@@ -366,7 +366,7 @@ const displayedList = computed<ListItem[]>(() => {
 
 const emptyListMessage = computed(() => {
   if (combinedList.value.length === 0) return 'Nema plaćanja za prikaz.';
-  return 'Nema neplaćenih plaćanja. Sve stavke su plaćene i sakrivene filtom "Sakrij plaćena".';
+  return 'Nema neplaćenih stavki. Sve je plaćeno i sakriveno filtom "Sakrij plaćena".';
 });
 
 const deleteConfirmMessage = computed(
